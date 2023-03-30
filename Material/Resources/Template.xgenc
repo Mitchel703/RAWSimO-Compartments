@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SimpleItemGeneratorConfiguration xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Template-1-Item</Name>
+  <DefaultWeight>0.01</DefaultWeight>
+  <DefaultCoWeight>0.2</DefaultCoWeight>
+  <ProbToUseCoWeight>0</ProbToUseCoWeight>
+  <ItemDescriptions>
+    <SkvpOfInt32Double>
+      <Key>0</Key>
+      <Value>100.00000001</Value>
+    </SkvpOfInt32Double>
+  </ItemDescriptions>
+  <ItemDescriptionWeights>
+    <SkvpOfInt32Double>
+      <Key>0</Key>
+      <Value>10.0</Value>
+    </SkvpOfInt32Double>
+  </ItemDescriptionWeights>
+  <ItemDescriptionBundleSizes>
+    <SkvpOfInt32Int32>
+      <Key>0</Key>
+      <Value>10</Value>
+    </SkvpOfInt32Int32>
+  </ItemDescriptionBundleSizes>
+  <ItemWeights>
+    <SkvpOfInt32Double>
+      <Key>0</Key>
+      <Value>1.0</Value>
+    </SkvpOfInt32Double>
+  </ItemWeights>
+  <ItemCoWeights />
+</SimpleItemGeneratorConfiguration>
