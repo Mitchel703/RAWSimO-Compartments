@@ -79,7 +79,7 @@ namespace RAWSimO.Core.Configurations
         /// The capacity of the pods.
         /// </summary>
         ///public double OverridePodCapacityValue = double.NaN;
-        public List<Compartment> OverridePodCapacityValue = new List<Compartment>();
+        public List<RAWSimO.Core.Elements.Compartment> OverridePodCapacityValue = new List<RAWSimO.Core.Elements.Compartment>();
         /// <summary>
         /// Indicates whether to override the values given by the instance for the parameter.
         /// </summary>
