@@ -333,13 +333,13 @@ namespace RAWSimO.Core
         /// <param name="orientation">The initial orientation of the pod.</param>
         /// <param name="capacity">The capacity of the pod.</param>
         /// <returns>The newly created pod.</returns>
-        public Pod CreatePod(int id, Tier tier, double x, double y, double radius, double orientation, double capacity)
+        public Pod CreatePod(int id, Tier tier, double x, double y, double radius, double orientation, List<Compartment> capacity)
         {
             // Consider override values
             if (SettingConfig.OverrideConfig != null && SettingConfig.OverrideConfig.OverridePodCapacity)
                 capacity = SettingConfig.OverrideConfig.OverridePodCapacityValue;
             // Create the pod
-            Pod pod = new Pod(this) { ID = id, Tier = tier, Radius = radius, X = x, Y = y, Orientation = orientation, Capacity = capacity };
+            Pod pod = new Pod(this) { ID = id, Tier = tier, Radius = radius, X = x, Y = y, Orientation = orientation, Compartments = capacity };
             Pods.Add(pod);
             tier.AddPod(pod);
             _idToPods[pod.ID] = pod;
@@ -360,13 +360,13 @@ namespace RAWSimO.Core
         /// <param name="orientation">The initial orientation of the pod.</param>
         /// <param name="capacity">The capacity of the pod.</param>
         /// <returns>The newly created pod.</returns>
-        public Pod CreatePod(int id, Tier tier, Waypoint waypoint, double radius, double orientation, double capacity)
+        public Pod CreatePod(int id, Tier tier, Waypoint waypoint, double radius, double orientation, List<Compartment> capacity)
         {
             // Consider override values
             if (SettingConfig.OverrideConfig != null && SettingConfig.OverrideConfig.OverridePodCapacity)
                 capacity = SettingConfig.OverrideConfig.OverridePodCapacityValue;
             // Create the pod
-            Pod pod = new Pod(this) { ID = id, Tier = tier, Radius = radius, X = waypoint.X, Y = waypoint.Y, Orientation = orientation, Capacity = capacity, Waypoint = waypoint };
+            Pod pod = new Pod(this) { ID = id, Tier = tier, Radius = radius, X = waypoint.X, Y = waypoint.Y, Orientation = orientation, Compartments = capacity, Waypoint = waypoint };
             Pods.Add(pod);
             tier.AddPod(pod);
             _idToPods[pod.ID] = pod;

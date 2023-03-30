@@ -184,7 +184,7 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
                     // Find the new emptiest pod
                     chosenPod = _classManager.GetClassPods(classId)
                         .Where(b => b.FitsForReservation(bundle))
-                        .OrderBy(b => (b.CapacityInUse + b.CapacityReserved) / b.Capacity)
+                        .OrderBy(b => (b.Compartments.First().CapacityInUse + b.Compartments.First().CapacityReserved) / b.Compartments.First().Capacity)
                         .FirstOrDefault();
                 }
                 else

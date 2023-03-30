@@ -53,13 +53,22 @@ namespace RAWSimO.Core.IO
         /// The capacity of the pod.
         /// </summary>
         [XmlAttribute]
-        public double Capacity;
+        public List<DTOPodCompartment> Compartments;
         /// <summary>
         /// Creates a DTO representation of the original object.
         /// </summary>
         /// <param name="value">The original object.</param>
         public static implicit operator DTOPod(Pod value)
         {
+            var compartmentsList = new List<DTOPodCompartment>();
+            foreach (var c in value.Compartments)
+            {
+                compartmentsList.Add(new DTOPodCompartment()
+                {
+                    Capacity = c.Capacity
+                });
+            }
+
             return value == null ? null : new DTOPod
             {
                 ID = value.ID,
@@ -68,7 +77,7 @@ namespace RAWSimO.Core.IO
                 Radius = value.Radius,
                 Orientation = value.Orientation,
                 Tier = value.Tier.ID,
-                Capacity = value.Capacity
+                Compartments = compartmentsList
             };
         }
 
@@ -87,7 +96,7 @@ namespace RAWSimO.Core.IO
         /// <returns>The original object created at the instance.</returns>
         public Pod Submit(Instance instance)
         {
-            return instance.CreatePod(ID, instance.GetTierByID(Tier), X, Y, Radius, Orientation, Capacity);
+            return instance.CreatePod(ID, instance.GetTierByID(Tier), X, Y, Radius, Orientation, Compartments);
         }
 
         #endregion

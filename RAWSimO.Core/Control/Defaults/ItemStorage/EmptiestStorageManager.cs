@@ -77,7 +77,7 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
                     // Choose the emptiest pod next
                     chosenPod = Instance.Pods
                         .Where(b => b.FitsForReservation(bundle))
-                        .ArgMin(b => (b.CapacityInUse + b.CapacityReserved) / b.Capacity);
+                        .ArgMin(b => (b.Compartments.First().CapacityInUse + b.Compartments.First().CapacityReserved) / b.Compartments.First().Capacity);
                     _lastChosenPod = chosenPod;
                 }
                 // If we found a pod, assign the bundle to it

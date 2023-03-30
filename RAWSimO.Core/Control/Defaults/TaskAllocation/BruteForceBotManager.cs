@@ -320,7 +320,7 @@ namespace RAWSimO.Core.Control.Defaults.TaskAllocation
                     double time = Math.Max(Estimators.EstimateTravelTimeEuclid(bot, bot.CurrentWaypoint, sw), Estimators.EstimateInputStationWaitTime(bot, sw));
 
                     // If it's the best and it fits the current pod, then use it
-                    if (time < closestInputStationTime && pod.CapacityInUse + storeTask.Bundle.BundleWeight <= pod.Capacity)
+                    if (time < closestInputStationTime && pod.Compartments.First().CapacityInUse + storeTask.Bundle.BundleWeight <= pod.Compartments.First().Capacity)
                     {
                         bestRequest = storeTask;
                         closestInputStationTime = time;
@@ -350,7 +350,7 @@ namespace RAWSimO.Core.Control.Defaults.TaskAllocation
                 foreach (var storeTask in Instance.ResourceManager.AvailableStoreRequests)
                 {
                     // If it has room
-                    if (pod.CapacityInUse + storeTask.Bundle.BundleWeight <= pod.Capacity)
+                    if (pod.Compartments.First().CapacityInUse + storeTask.Bundle.BundleWeight <= pod.Compartments.First().Capacity)
                     {
                         // See how long it would take to get to this input station
                         // Choose the worst of delivering or waiting

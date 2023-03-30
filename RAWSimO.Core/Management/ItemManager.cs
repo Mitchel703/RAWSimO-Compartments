@@ -701,7 +701,7 @@ namespace RAWSimO.Core.Management
         private void InitializePodContentsRandomly(double initialInventory)
         {
             // Add stuff to pods
-            while (Instance.Pods.Sum(b => b.CapacityInUse) / Instance.Pods.Sum(b => b.Capacity) < initialInventory)
+            while (Instance.Pods.Sum(b => b.Compartments.First().CapacityInUse) / Instance.Pods.Sum(b => b.Compartments.First().Capacity) < initialInventory)
             {
                 // Create bundle
                 ItemBundle bundle = GenerateBundle();

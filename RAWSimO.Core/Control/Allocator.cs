@@ -49,7 +49,7 @@ namespace RAWSimO.Core.Control
             // Check whether decision is possible
             if (station.CapacityInUse + bundle.BundleWeight > station.Capacity)
                 throw new InvalidOperationException("Allocating the bundle to the station would exceed its capacity!");
-            if (Instance.ControllerConfig.ItemStorageConfig.GetMethodType() != ItemStorageMethodType.Dummy && pod.CapacityInUse + bundle.BundleWeight > pod.Capacity)
+            if (Instance.ControllerConfig.ItemStorageConfig.GetMethodType() != ItemStorageMethodType.Dummy && pod.Compartments.First().CapacityInUse + bundle.BundleWeight > pod.Compartments.First().Capacity)
                 throw new InvalidOperationException("Allocating the bundle to the pod would exceed its capacity!");
             // Remove from ready lists
             _iStationAssignments.Remove(bundle);

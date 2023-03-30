@@ -111,7 +111,7 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
                            .OrderBy(b =>
                            {
                                // Smalles == best == emptiest
-                               double orderValue = (b.CapacityInUse + b.CapacityReserved) / b.Capacity;
+                               double orderValue = (b.Compartments.First().CapacityInUse + b.Compartments.First().CapacityReserved) / b.Compartments.First().Capacity;
                                // Punish pod in use
                                if (b.InUse)
                                    orderValue += 1;

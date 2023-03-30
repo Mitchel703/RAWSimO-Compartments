@@ -4,7 +4,6 @@ using RAWSimO.Core.Info;
 using RAWSimO.Core.IO;
 using RAWSimO.Core.Items;
 using RAWSimO.Core.Management;
-using RAWSimO.Core.Metrics;
 using RAWSimO.Core.Waypoints;
 using RAWSimO.Toolbox;
 using System;
@@ -43,20 +42,21 @@ namespace RAWSimO.Core.Elements
         /// </summary>
         internal const int MAX_ITEMDESCRIPTION_COUNT_FOR_FAST_ACCESS = 1000;
 
-        /// <summary>
-        /// The capacity of this pod.
-        /// </summary>
-        internal double Capacity;
+        ///// <summary>
+        ///// The capacity of this pod.
+        ///// </summary>
+        //internal double Capacity;
+        internal List<Compartment> Compartments;
 
-        /// <summary>
-        /// The amount of capacity currently in use.
-        /// </summary>
-        internal double CapacityInUse;
+        ///// <summary>
+        ///// The amount of capacity currently in use.
+        ///// </summary>
+        //internal double CapacityInUse;
 
-        /// <summary>
-        /// The amount of capacity that is currently reserved by a controller.
-        /// </summary>
-        internal double CapacityReserved;
+        ///// <summary>
+        ///// The amount of capacity that is currently reserved by a controller.
+        ///// </summary>
+        //internal double CapacityReserved;
 
         /// <summary>
         /// Indicates whether the pod is currently carried by a bot.
@@ -73,14 +73,6 @@ namespace RAWSimO.Core.Elements
         /// </summary>
         internal Bot Bot;
 
-        /// <summary>
-        /// The set of bundles not yet allocated but already registered with this pod.
-        /// </summary>
-        private HashSet<ItemBundle> _registeredBundles = new HashSet<ItemBundle>();
-        /// <summary>
-        /// The set of bundles registered for this pod.
-        /// </summary>
-        public IEnumerable<ItemBundle> RegisteredBundles { get { return _registeredBundles; } }
 
         /// <summary>
         /// All items that are physically contained in this pod.
@@ -127,10 +119,9 @@ namespace RAWSimO.Core.Elements
         /// <param name="bundle">The bundle for which capacity shall be reserved.</param>
         internal void RegisterBundle(ItemBundle bundle)
         {
-            _registeredBundles.Add(bundle);
-            CapacityReserved = _registeredBundles.Sum(b => b.BundleWeight);
-            if (CapacityInUse + CapacityReserved > Capacity)
-                throw new InvalidOperationException("Cannot reserve more capacity than this pod has!");
+            //TODO: pick appropriate compartment
+            var chosenCompartment = Compartments.First();
+            chosenCompartment.RegisterBundle(bundle);
             // Notify the instance about the reservation
             Instance.NotifyBundleRegistered(this, bundle);
         }
@@ -175,21 +166,19 @@ namespace RAWSimO.Core.Elements
         /// <returns><code>true</code> if the item was added successfully, <code>false</code> otherwise.</returns>
         public bool Add(ItemBundle itemBundle, InsertRequest insertRequest = null)
         {
+            var choosenCompartment = Compartments.First();
             // Signal change
             _changed = true;
             // Init, if not done yet
             if (_itemDescriptionCountContained == null)
                 InitPodContentInfo();
             // Only add the item, if there is enough remaining capacity
-            if (CapacityInUse + itemBundle.BundleWeight <= Capacity)
+            if (choosenCompartment.CapacityInUse + itemBundle.BundleWeight <= choosenCompartment.Capacity)
             {
                 // Prepare info for the interface
                 _contentChanged = true;
-                // Keep track of weight
-                CapacityInUse += itemBundle.BundleWeight;
-                // Keep track of reserved space
-                _registeredBundles.Remove(itemBundle);
-                CapacityReserved = _registeredBundles.Sum(b => b.BundleWeight);
+                choosenCompartment.Add(itemBundle, insertRequest);
+
                 // Keep track of items actually contained in this pod
                 if (_itemDescriptionCountContained[itemBundle.ItemDescription] <= 0)
                     _itemDescriptionsContained.Add(itemBundle.ItemDescription);
@@ -218,6 +207,7 @@ namespace RAWSimO.Core.Elements
         /// <param name="extractRequest">The corresponding extract request.</param>
         public void Remove(ItemDescription item, ExtractRequest extractRequest)
         {
+            var choosenCompartment = Compartments.First();
             // Signal change
             _changed = true;
             // Mark extract request completed, if there is one
@@ -228,28 +218,13 @@ namespace RAWSimO.Core.Elements
             if (_itemDescriptionCountContained[item] <= 0)
                 _itemDescriptionsContained.Remove(item);
             // Keep track of weight
-            CapacityInUse -= item.Weight;
+            choosenCompartment.CapacityInUse -= item.Weight;
             // Notify the instance about the removed item
             Instance.NotifyItemExtracted(this, item);
             // Prepare info for the interface
             _contentChanged = true;
         }
 
-        /// <summary>
-        /// Checks the distance from a pod to an output station.
-        /// </summary>
-        /// <param></param>
-        /// <returns><code>true</code> if such an item is present, <code>false</code> otherwise.</returns>
-        public double DistanceToOutputStation()
-        {
-            return Instance.OutputStations.Min(s => Metrics.Distances.CalculateEuclid(this, s, Instance.WrongTierPenaltyDistance));
-        }
-        /// <summary>
-        /// Checks whether the pod is empty or not.
-        /// </summary>
-        /// <param name="itemDescription">The description to check.</param>
-        /// <returns><code>true</code> if such an item is present, <code>false</code> otherwise.</returns>
-        public bool IsEmpty() { return CapacityInUse == 0; }
         /// <summary>
         /// Checks whether an item matching the description is contained in this pod.
         /// </summary>
@@ -282,14 +257,22 @@ namespace RAWSimO.Core.Elements
         /// </summary>
         /// <param name="bundle">The item-bundle to check.</param>
         /// <returns><code>true</code> if the items fit this pod, <code>false</code> otherwise.</returns>
-        public bool Fits(ItemBundle bundle) { return CapacityInUse + bundle.BundleWeight <= Capacity; }
+        public bool Fits(ItemBundle bundle)
+        {
+            var compartment = Compartments.First();
+            return compartment.CapacityInUse + bundle.BundleWeight <= compartment.Capacity;
+        }
 
         /// <summary>
         /// Checks whether the specified bundle of items can be added for reservation to this pod.
         /// </summary>
         /// <param name="bundle">The bundle that has to be checked.</param>
         /// <returns><code>true</code> if the bundle fits, <code>false</code> otherwise.</returns>
-        public bool FitsForReservation(ItemBundle bundle) { return CapacityInUse + CapacityReserved + bundle.BundleWeight <= Capacity; }
+        public bool FitsForReservation(ItemBundle bundle) { 
+            var compartment = Compartments.First();
+
+            return compartment.CapacityInUse + compartment.CapacityReserved + bundle.BundleWeight <= compartment.Capacity; 
+        }
 
         #endregion
 
@@ -329,10 +312,11 @@ namespace RAWSimO.Core.Elements
         /// <returns>A simple string.</returns>
         public override string ToString()
         {
+            var c = Compartments.First();
             return
                 "Pod" + ID + "(" +
-                (CapacityInUse / Capacity).ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "%" +
-                ((CapacityInUse + CapacityReserved) / Capacity).ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "%)";
+                (c.CapacityInUse / c.Capacity).ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "%" +
+                ((c.CapacityInUse + c.CapacityReserved) / c.Capacity).ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "%)";
         }
 
         #endregion
@@ -391,6 +375,7 @@ namespace RAWSimO.Core.Elements
         /// <returns>The heat of this pod.</returns>
         public double GetInfoHeatValue()
         {
+            var c = Compartments.First();
             switch (Instance.SettingConfig.HeatMode)
             {
                 case HeatMode.NumItemsHandled:
@@ -398,7 +383,7 @@ namespace RAWSimO.Core.Elements
                 case HeatMode.NumBundlesHandled:
                     return Instance.StatMaxBundlesHandledByPod > 0 ? (double)StatBundlesHandled / (double)Instance.StatMaxBundlesHandledByPod : 0;
                 case HeatMode.CurrentCapacityUtilization:
-                    return CapacityInUse / Capacity;
+                    return c.CapacityInUse / c.Capacity;
                 case HeatMode.AverageFrequency:
                     {
                         if (_itemDescriptionCountContained == null || !Instance.ItemDescriptions.Any(item => _itemDescriptionCountContained[item] > 0))
@@ -518,17 +503,17 @@ namespace RAWSimO.Core.Elements
         /// Gets the capacity this pod offers.
         /// </summary>
         /// <returns>The capacity of the pod.</returns>
-        public double GetInfoCapacity() { return Capacity; }
+        public double GetInfoCapacity() { return Compartments.First().Capacity; }
         /// <summary>
         /// Gets the absolute capacity currently in use.
         /// </summary>
         /// <returns>The capacity in use.</returns>
-        public double GetInfoCapacityUsed() { return CapacityInUse; }
+        public double GetInfoCapacityUsed() { return Compartments.First().CapacityInUse; }
         /// <summary>
         /// Gets the absolute capacity currently reserved.
         /// </summary>
         /// <returns>The capacity reserved.</returns>
-        public double GetInfoCapacityReserved() { return CapacityReserved; }
+        public double GetInfoCapacityReserved() { return Compartments.First().CapacityReserved; }
         /// <summary>
         /// Indicates whether something changed 
         /// </summary>
