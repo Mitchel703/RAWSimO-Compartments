@@ -242,7 +242,7 @@ namespace RAWSimO.Core.Configurations
             if (overrideConfig.OverrideBotTurnSpeed)
                 TurnSpeed = overrideConfig.OverrideBotTurnSpeedValue;
             if (overrideConfig.OverridePodCapacity)
-                PodCapacity = overrideConfig.OverridePodCapacityValue;
+                PodCapacity = overrideConfig.OverridePodCapacityValue.First().Capacity;
             if (overrideConfig.OverrideInputStationCapacity)
                 IStationCapacity = overrideConfig.OverrideInputStationCapacityValue;
             if (overrideConfig.OverrideOutputStationCapacity)

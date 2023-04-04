@@ -372,7 +372,9 @@ namespace RAWSimO.Core.Generator
             {
                 int waypointIndex = rand.NextInt(potentialWaypoints.Count);
                 Waypoint chosenWaypoint = potentialWaypoints[waypointIndex];
-                Pod pod = instance.CreatePod(instance.RegisterPodID(), tier, chosenWaypoint, lc.PodRadius, orientationPodDefault, lc.PodCapacity;
+                var comparments = new List<DTOPodCompartment>();
+                comparments.Add(new DTOPodCompartment() { Capacity = lc.PodCapacity });
+                Pod pod = instance.CreatePod(instance.RegisterPodID(), tier, chosenWaypoint, lc.PodRadius, orientationPodDefault, comparments);
                 potentialWaypoints.RemoveAt(waypointIndex);
             }
         }

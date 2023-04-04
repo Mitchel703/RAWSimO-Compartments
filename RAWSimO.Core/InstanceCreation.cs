@@ -7,6 +7,7 @@ using RAWSimO.MultiAgentPathFinding;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using RAWSimO.Core.IO;
 
 namespace RAWSimO.Core
 {
@@ -333,13 +334,18 @@ namespace RAWSimO.Core
         /// <param name="orientation">The initial orientation of the pod.</param>
         /// <param name="capacity">The capacity of the pod.</param>
         /// <returns>The newly created pod.</returns>
-        public Pod CreatePod(int id, Tier tier, double x, double y, double radius, double orientation, List<Compartment> capacity)
+        public Pod CreatePod(int id, Tier tier, double x, double y, double radius, double orientation, List<DTOPodCompartment> capacity)
         {
             // Consider override values
             if (SettingConfig.OverrideConfig != null && SettingConfig.OverrideConfig.OverridePodCapacity)
                 capacity = SettingConfig.OverrideConfig.OverridePodCapacityValue;
             // Create the pod
-            Pod pod = new Pod(this) { ID = id, Tier = tier, Radius = radius, X = x, Y = y, Orientation = orientation, Compartments = capacity };
+            var compartments = new List<Compartment>();
+            foreach (var c in capacity)
+            {
+                compartments.Add(new Compartment("any name", c.Capacity));
+            }
+            Pod pod = new Pod(this) { ID = id, Tier = tier, Radius = radius, X = x, Y = y, Orientation = orientation, Compartments = compartments };
             Pods.Add(pod);
             tier.AddPod(pod);
             _idToPods[pod.ID] = pod;
@@ -360,13 +366,18 @@ namespace RAWSimO.Core
         /// <param name="orientation">The initial orientation of the pod.</param>
         /// <param name="capacity">The capacity of the pod.</param>
         /// <returns>The newly created pod.</returns>
-        public Pod CreatePod(int id, Tier tier, Waypoint waypoint, double radius, double orientation, List<Compartment> capacity)
+        public Pod CreatePod(int id, Tier tier, Waypoint waypoint, double radius, double orientation, List<DTOPodCompartment> capacity)
         {
             // Consider override values
             if (SettingConfig.OverrideConfig != null && SettingConfig.OverrideConfig.OverridePodCapacity)
                 capacity = SettingConfig.OverrideConfig.OverridePodCapacityValue;
             // Create the pod
-            Pod pod = new Pod(this) { ID = id, Tier = tier, Radius = radius, X = waypoint.X, Y = waypoint.Y, Orientation = orientation, Compartments = capacity, Waypoint = waypoint };
+            var compartments = new List<Compartment>();
+            foreach (var c in capacity)
+            {
+                compartments.Add(new Compartment("any name", c.Capacity));
+            }
+            Pod pod = new Pod(this) { ID = id, Tier = tier, Radius = radius, X = waypoint.X, Y = waypoint.Y, Orientation = orientation, Compartments = compartments, Waypoint = waypoint };
             Pods.Add(pod);
             tier.AddPod(pod);
             _idToPods[pod.ID] = pod;
