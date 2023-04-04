@@ -52,7 +52,7 @@ namespace RAWSimO.Core.IO
         /// <summary>
         /// The capacity of the pod.
         /// </summary>
-        [XmlAttribute]
+        [XmlElement]
         public List<DTOPodCompartment> Compartments;
         /// <summary>
         /// Creates a DTO representation of the original object.
