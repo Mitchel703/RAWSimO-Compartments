@@ -1018,13 +1018,12 @@ namespace RAWSimO.Visualization.Rendering
                 {
                     WrapPanel capacityCompartmentPanel = new WrapPanel { Orientation = Orientation.Horizontal };
                     capacityCompartmentPanel.Children.Add(new TextBlock { Text = $"Compartment capacity {i}: ", TextAlignment = TextAlignment.Right, MinWidth = _infoPanelLeftColumnWidth });
-                    _blockCapacity = new TextBlock
+                    capacityCompartmentPanel.Children.Add(new TextBlock
                     {
                         Text = compartmentCapacitiesInUse[i].ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "/" +
                         compartmentCapacities[i].ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER),
                         MinWidth = _infoPanelRightColumnWidth,
-                    };
-                    capacityCompartmentPanel.Children.Add(_blockCapacity);
+                    });
                     _root.Items.Add(capacityCompartmentPanel);
                 }
 
