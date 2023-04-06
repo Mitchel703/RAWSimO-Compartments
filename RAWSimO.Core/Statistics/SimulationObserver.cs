@@ -792,9 +792,9 @@ namespace RAWSimO.Core.Statistics
                 _nextSnapshotInventoryLevelPolling += STEP_LENGTH_INVENTORY_POLL;
                 // Get maximal inventory level
                 if (double.IsNaN(_maxInventoryCapacity))
-                    _maxInventoryCapacity = _instance.Pods.Sum(b => b.Compartments.First().Capacity);
+                    _maxInventoryCapacity = _instance.Pods.Sum(b => b.Compartments.Capacity);
                 // Fetch inventory level
-                double level = _instance.Pods.Sum(b => b.Compartments.First().CapacityInUse) / _maxInventoryCapacity;
+                double level = _instance.Pods.Sum(b => b.Compartments.Sum(x => x.CapacityInUse)) / _maxInventoryCapacity;
                 // Get inversions
                 int invCombinedTotal; int invCombinedRank; double invCombinedAvgRank;
                 int invSpeedTotal; int invSpeedRank; double invSpeedAvgRank;

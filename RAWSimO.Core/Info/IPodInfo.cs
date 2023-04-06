@@ -27,6 +27,12 @@ namespace RAWSimO.Core.Info
         /// </summary>
         /// <returns>The capacity in use.</returns>
         double GetInfoCapacityUsed();
+        List<double> GetInfoCompartmentCapacity();
+        /// <summary>
+        /// Gets the absolute capacity currently in use.
+        /// </summary>
+        /// <returns>The capacity in use.</returns>
+        List<double> GetInfoCompartmentsCapacityUsed();
         /// <summary>
         /// Gets the absolute capacity currently reserved.
         /// </summary>

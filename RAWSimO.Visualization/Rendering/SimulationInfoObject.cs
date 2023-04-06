@@ -444,7 +444,7 @@ namespace RAWSimO.Visualization.Rendering
                 _root.Items.Add(xyPanel);
                 // Add capacity
                 WrapPanel capacityPanel = new WrapPanel { Orientation = Orientation.Horizontal };
-                capacityPanel.Children.Add(new TextBlock { Text = "Capacity: ", TextAlignment = TextAlignment.Right, MinWidth = _infoPanelLeftColumnWidth });
+                capacityPanel.Children.Add(new TextBlock { Text = "Capacity Test: ", TextAlignment = TextAlignment.Right, MinWidth = _infoPanelLeftColumnWidth });
                 _blockCapacity = new TextBlock
                 {
                     Text = _iStation.GetInfoCapacityUsed().ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "/" +
@@ -1010,6 +1010,24 @@ namespace RAWSimO.Visualization.Rendering
                 };
                 capacityPanel.Children.Add(_blockCapacity);
                 _root.Items.Add(capacityPanel);
+
+                // Add compartments capacity
+                var compartmentCapacities = _pod.GetInfoCompartmentCapacity();
+                var compartmentCapacitiesInUse = _pod.GetInfoCompartmentsCapacityUsed();
+                for (int i = 0; i < compartmentCapacitiesInUse.Count; i++)
+                {
+                    WrapPanel capacityCompartmentPanel = new WrapPanel { Orientation = Orientation.Horizontal };
+                    capacityCompartmentPanel.Children.Add(new TextBlock { Text = $"Compartment capacity {i}: ", TextAlignment = TextAlignment.Right, MinWidth = _infoPanelLeftColumnWidth });
+                    _blockCapacity = new TextBlock
+                    {
+                        Text = compartmentCapacitiesInUse[i].ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "/" +
+                        compartmentCapacities[i].ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER),
+                        MinWidth = _infoPanelRightColumnWidth,
+                    };
+                    capacityCompartmentPanel.Children.Add(_blockCapacity);
+                    _root.Items.Add(capacityCompartmentPanel);
+                }
+
                 // Add capacity reserved
                 WrapPanel capacityReservedPanel = new WrapPanel { Orientation = Orientation.Horizontal };
                 capacityReservedPanel.Children.Add(new TextBlock { Text = "Capacity reserved: ", TextAlignment = TextAlignment.Right, MinWidth = _infoPanelLeftColumnWidth });
@@ -1021,6 +1039,7 @@ namespace RAWSimO.Visualization.Rendering
                 };
                 capacityReservedPanel.Children.Add(_blockCapacityReserved);
                 _root.Items.Add(capacityReservedPanel);
+
                 // Add capacity reserved
                 WrapPanel storageTagPanel = new WrapPanel { Orientation = Orientation.Horizontal };
                 storageTagPanel.Children.Add(new TextBlock { Text = "Storage tag: ", TextAlignment = TextAlignment.Right, MinWidth = _infoPanelLeftColumnWidth });

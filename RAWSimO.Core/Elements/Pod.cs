@@ -503,17 +503,24 @@ namespace RAWSimO.Core.Elements
         /// Gets the capacity this pod offers.
         /// </summary>
         /// <returns>The capacity of the pod.</returns>
-        public double GetInfoCapacity() { return Compartments.First().Capacity; }
+        public double GetInfoCapacity() { return Compartments.Sum(x => x.Capacity); }
+
+        public List<double> GetInfoCompartmentCapacity() { return Compartments.Select(x=>x.Capacity).ToList(); }
+
+
         /// <summary>
         /// Gets the absolute capacity currently in use.
         /// </summary>
         /// <returns>The capacity in use.</returns>
-        public double GetInfoCapacityUsed() { return Compartments.First().CapacityInUse; }
+        public double GetInfoCapacityUsed() { return Compartments.Sum(x => x.CapacityInUse); }
+
+        public List<double> GetInfoCompartmentsCapacityUsed() { return Compartments.Select(x => x.CapacityInUse).ToList(); }
+
         /// <summary>
         /// Gets the absolute capacity currently reserved.
         /// </summary>
         /// <returns>The capacity reserved.</returns>
-        public double GetInfoCapacityReserved() { return Compartments.First().CapacityReserved; }
+        public double GetInfoCapacityReserved() { return Compartments.Sum(x => x.CapacityReserved); }
         /// <summary>
         /// Indicates whether something changed 
         /// </summary>
