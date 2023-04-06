@@ -81,7 +81,7 @@ namespace RAWSimO.Core.Configurations
         /// <summary>
         /// The capacity of a pod.
         /// </summary>
-        public double PodCapacity = 500;
+        public List<DTOPodCompartment> PodCompartments;
         /// <summary>
         /// The radius of the I/O-stations in m.
         /// </summary>
@@ -242,7 +242,7 @@ namespace RAWSimO.Core.Configurations
             if (overrideConfig.OverrideBotTurnSpeed)
                 TurnSpeed = overrideConfig.OverrideBotTurnSpeedValue;
             if (overrideConfig.OverridePodCapacity)
-                PodCapacity = overrideConfig.OverridePodCapacityValue.First().Capacity;
+                PodCompartments = overrideConfig.OverridePodCapacityValue;
             if (overrideConfig.OverrideInputStationCapacity)
                 IStationCapacity = overrideConfig.OverrideInputStationCapacityValue;
             if (overrideConfig.OverrideOutputStationCapacity)
@@ -391,9 +391,9 @@ namespace RAWSimO.Core.Configurations
                 errorMessage = "PodRadius <= 0 || PodRadius >= 0.5, PodRadius: " + PodRadius;
                 return false;
             }
-            if (PodCapacity <= 0)
+            if (PodCompartments == null || !PodCompartments.Any())
             {
-                errorMessage = "PodCapacity <= 0, PodCapacity: " + PodCapacity;
+                errorMessage = "No PodCompartments";
                 return false;
             }
             if (StationRadius <= 0 || StationRadius >= 0.5)

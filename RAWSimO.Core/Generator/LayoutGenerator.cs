@@ -192,9 +192,15 @@ namespace RAWSimO.Core.Generator
             }
 
             baseConfiguration.InventoryConfiguration.autogenerate();
-            if (!baseConfiguration.InventoryConfiguration.isValid(layoutConfiguration.PodCapacity, out errorMessage))
+            if (layoutConfiguration.PodCompartments == null || !layoutConfiguration.PodCompartments.Any())
+                throw new ArgumentException("InventoryConfiguration is not valid. No compartments given.");
+
+            foreach (var c in layoutConfiguration.PodCompartments)
             {
-                throw new ArgumentException("InventoryConfiguration is not valid. " + errorMessage);
+                if (!baseConfiguration.InventoryConfiguration.isValid(c.Capacity, out errorMessage))
+                {
+                    throw new ArgumentException("InventoryConfiguration is not valid. " + errorMessage);
+                }
             }
 
             if (!controlConfiguration.IsValid(out errorMessage))
@@ -372,9 +378,7 @@ namespace RAWSimO.Core.Generator
             {
                 int waypointIndex = rand.NextInt(potentialWaypoints.Count);
                 Waypoint chosenWaypoint = potentialWaypoints[waypointIndex];
-                var comparments = new List<DTOPodCompartment>();
-                comparments.Add(new DTOPodCompartment() { Capacity = lc.PodCapacity });
-                Pod pod = instance.CreatePod(instance.RegisterPodID(), tier, chosenWaypoint, lc.PodRadius, orientationPodDefault, comparments);
+                Pod pod = instance.CreatePod(instance.RegisterPodID(), tier, chosenWaypoint, lc.PodRadius, orientationPodDefault, lc.PodCompartments);
                 potentialWaypoints.RemoveAt(waypointIndex);
             }
         }

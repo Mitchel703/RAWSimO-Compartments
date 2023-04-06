@@ -446,7 +446,7 @@ namespace RAWSimO.Core.Generator
             layoutConfiguration.PodTransferTime = 3;
             layoutConfiguration.PodAmount = 0.85;
             layoutConfiguration.PodRadius = 0.4;
-            layoutConfiguration.PodCapacity = 500;
+            layoutConfiguration.PodCompartments = new List<DTOPodCompartment>() { new DTOPodCompartment { Capacity= 500}, new DTOPodCompartment { Capacity = 501 } };
             layoutConfiguration.StationRadius = 0.4;
             layoutConfiguration.ItemTransferTime = 10;
             layoutConfiguration.ItemPickTime = 3;
