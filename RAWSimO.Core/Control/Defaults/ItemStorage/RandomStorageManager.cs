@@ -40,9 +40,9 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
         /// <returns>The selected pod.</returns>
         public override Pod SelectPodForInititalInventory(Instance instance, ItemBundle bundle)
         {
-            // Add to a random pod
-            return instance.Pods
-                .Where(p => p.FitsForReservation(bundle))
+            // Add to a random pod compartment, but only 1 bundle is allowed per compartment
+            return instance.Pods //How to change this to compartments?
+                .Where(p => p.FitsForReservation(bundle)) //.Where(c => c.FitsForReservation(bundle) && c.CountContained == 0) 
                 .OrderBy(p => instance.Randomizer.NextDouble())
                 .First();
         }
