@@ -247,6 +247,7 @@ namespace RAWSimO.Core.IO
             /// The file for storing the individual consolidated performance result for the async order manager, if present.
             /// </summary>
             IndividualPerformanceFileOrderManagerAsyncConsolidated,
+            PodCompartmentsPollingRaw,
         }
         /// <summary>
         /// Contains all names to use for the statistic files defined.
@@ -281,6 +282,7 @@ namespace RAWSimO.Core.IO
             { StatFile.HeatStorageLocationPolling, "storagelocationinfopolled.heat" },
             { StatFile.IndividualPerformanceFileOrderManagerAsyncSeparate, "ordermanagerasyncseparate.csv" },
             { StatFile.IndividualPerformanceFileOrderManagerAsyncConsolidated, "ordermanagerasyncconsolidated.csv" },
+            { StatFile.PodCompartmentsPollingRaw, "podcompartments.csv" },
         };
 
         #endregion

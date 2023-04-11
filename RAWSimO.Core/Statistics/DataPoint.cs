@@ -1589,7 +1589,9 @@ namespace RAWSimO.Core.Statistics
             // Rates
             _entryValues[FootPrintEntry.BundleThroughputRate] = instance.StatOverallBundlesHandled / TimeSpan.FromSeconds(instance.SettingConfig.SimulationDuration).TotalHours;
             _entryValues[FootPrintEntry.ItemThroughputRate] = instance.StatOverallItemsHandled / TimeSpan.FromSeconds(instance.SettingConfig.SimulationDuration).TotalHours;
-            _entryValues[FootPrintEntry.ItemThroughputRateUB] = instance.OutputStations.Any() ? UpperBoundHelper.CalcUBItemThroughputRate(instance, instance.OutputStations.Where(s => s.StatNumItemsPicked > 0).Average(s => s.StatItemPileOn)) : 0;
+            var stationsPicked = instance.OutputStations.Where(s => s.StatNumItemsPicked > 0);
+            var stationsPickedAvg = stationsPicked.Any() ? stationsPicked.Average(s => s.StatItemPileOn) : 0;
+            _entryValues[FootPrintEntry.ItemThroughputRateUB] = instance.OutputStations.Any() ? UpperBoundHelper.CalcUBItemThroughputRate(instance, stationsPickedAvg) : 0;
             _entryValues[FootPrintEntry.ItemThroughputRateScore] = (double)_entryValues[FootPrintEntry.ItemThroughputRate] / (double)_entryValues[FootPrintEntry.ItemThroughputRateUB];
             _entryValues[FootPrintEntry.LineThroughputRate] = instance.StatOverallLinesHandled / TimeSpan.FromSeconds(instance.SettingConfig.SimulationDuration).TotalHours;
             _entryValues[FootPrintEntry.OrderThroughputRate] = instance.StatOverallOrdersHandled / TimeSpan.FromSeconds(instance.SettingConfig.SimulationDuration).TotalHours;
@@ -3173,6 +3175,40 @@ namespace RAWSimO.Core.Statistics
         public static string GetHeader()
         {
             return string.Join(IOConstants.DELIMITER_VALUE.ToString(), ReflectionTools.ConvertFieldsToDescriptions(typeof(InventoryLevelDatapoint)));
+        }
+    }
+
+    public class PodCompartmentDatapoint
+    {
+        public double TimeStamp;
+        public string PodId;
+        public string CompartmentId;
+        public double CapacityInUse;
+        public double Capacity;
+
+        public PodCompartmentDatapoint(double timestamp, string podId, string compartmentId, double capacityInUse, double capacity)
+        {
+            TimeStamp = timestamp; 
+            PodId = podId;
+            CompartmentId = compartmentId;
+            CapacityInUse = capacityInUse;
+            Capacity = capacity;
+        }
+
+        public PodCompartmentDatapoint(string line)
+        {
+            string[] values = line.Split(IOConstants.DELIMITER_VALUE);
+            ReflectionTools.ParseStringToFields(this, typeof(PodCompartmentDatapoint), values, IOConstants.FORMATTER);
+        }
+
+        public string GetLine()
+        {
+            return string.Join(IOConstants.DELIMITER_VALUE.ToString(), ReflectionTools.ConvertFields(this, typeof(PodCompartmentDatapoint), IOConstants.FORMATTER, IOConstants.EXPORT_FORMAT_SHORTER).ToArray());
+        }
+
+        public static string GetHeader()
+        {
+            return string.Join(IOConstants.DELIMITER_VALUE.ToString(), ReflectionTools.ConvertFieldsToDescriptions(typeof(PodCompartmentDatapoint)));
         }
     }
 

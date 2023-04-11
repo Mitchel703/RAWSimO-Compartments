@@ -75,6 +75,7 @@ namespace RAWSimO.Core.Statistics
             _nextSnapshotPerformancePolling = _instance.StatTimeStart;
             _nextSnapshotBotInfoPolling = _instance.StatTimeStart;
             _nextSnapshotInventoryLevelPolling = _instance.StatTimeStart;
+            _nextSnapshotPodCompartmentsPolling = _instance.StatTimeStart;
             _nextSnapshotBundleOrderSituationPolling = _instance.StatTimeStart;
             _nextSnapshotPodHandlingPolling = _instance.StatTimeStart;
             _nextSnapshotWellSortednessPolling = _instance.StatTimeStart;
@@ -128,6 +129,7 @@ namespace RAWSimO.Core.Statistics
             FlushStorageLocationInfoPolled();
             FlushBotInfoPolled();
             FlushInventoryLevelPolled();
+            FlushPodCompartmentsPolled();
             FlushPerformancePolls();
             FlushBundleOrderSituationPolled();
             FlushPodHandlingPolled();
@@ -379,6 +381,42 @@ namespace RAWSimO.Core.Statistics
             }
             // Clear the data points
             _logInventoryLevelPolling.Clear();
+        }
+
+        #endregion
+
+        #region PodCompartments
+
+        private double _nextSnapshotPodCompartmentsPolling;
+
+        private double _maxPodCompartmentsCapacity = double.NaN;
+
+        private List<PodCompartmentDatapoint> _logPodsCompartmentPolling = new List<PodCompartmentDatapoint>();
+        internal IEnumerable<PodCompartmentDatapoint> PodCompartmentsLog { get { return _logPodsCompartmentPolling; } }
+
+        private void FlushPodCompartmentsPolled()
+        {
+            // Init statistics directory
+            _instance.StatInitDirectory();
+            // Write 
+            switch (_instance.SettingConfig.LogFileLevel)
+            {
+                case Configurations.LogFileLevel.All:
+                    bool alreadyExists = File.Exists(Path.Combine(_instance.SettingConfig.StatisticsDirectory, IOConstants.StatFileNames[IOConstants.StatFile.PodCompartmentsPollingRaw]));
+                    using (StreamWriter sw = new StreamWriter(Path.Combine(_instance.SettingConfig.StatisticsDirectory, IOConstants.StatFileNames[IOConstants.StatFile.PodCompartmentsPollingRaw]), true))
+                    {
+                        if (!alreadyExists)
+                            sw.WriteLine(IOConstants.COMMENT_LINE + PodCompartmentDatapoint.GetHeader());
+                        foreach (var d in _logPodsCompartmentPolling)
+                            sw.WriteLine(d.GetLine());
+                    }
+                    break;
+                case Configurations.LogFileLevel.FootprintOnly:
+                    break;
+                default: throw new ArgumentException("Unknown log level: " + _instance.SettingConfig.LogFileLevel);
+            }
+            // Clear the data points
+            _logPodsCompartmentPolling.Clear();
         }
 
         #endregion
@@ -818,6 +856,29 @@ namespace RAWSimO.Core.Statistics
                     // Utility inversion info
                     invUtilityTotal, invUtilityRank, invUtilityAvgRank));
                 // No flushing of this kind of data, because it is used (in the end) for the footprint datapoint too
+            }
+            // Monitor pods compartments
+            if (currentTime >= _nextSnapshotPodCompartmentsPolling)
+            {
+                // Calculate next snapshot
+                _nextSnapshotPodCompartmentsPolling += STEP_LENGTH_INVENTORY_POLL;
+                // Get maximal inventory level
+                //if (double.IsNaN(_maxPodCompartmentsCapacity))
+                //    _maxPodCompartmentsCapacity = _instance.Pods.Sum(b => b.Compartments.Capacity);
+
+                foreach (var pod in _instance.Pods)
+                {
+                    for (int i = 0; i < pod.Compartments.Count; i++)
+                    {
+                        _logPodsCompartmentPolling.Add(new PodCompartmentDatapoint(
+                            _instance.StatTime,
+                            pod.GetIdentfierString(),
+                            i.ToString(),
+                            pod.Compartments[i].CapacityInUse,
+                            pod.Compartments[i].Capacity
+                        ));
+                    }
+                }
             }
             // Monitor backlog level
             if (currentTime >= _nextSnapshotBundleOrderSituationPolling)
