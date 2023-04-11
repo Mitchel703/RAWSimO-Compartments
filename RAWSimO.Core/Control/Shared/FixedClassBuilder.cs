@@ -406,21 +406,27 @@ namespace RAWSimO.Core.Control.Shared
 
             // Group items to classes
             _itemClasses = new Dictionary<ItemDescription, int>();
-            int currentClass = 0; double aggregatedWeightedDemand = 0; double aggregatedWeightedCapacity = classStorageCapacityShares[0];
+            int currentClass = 0; double aggregatedWeightedDemand = 0; double aggregatedWeightedCapacity = classStorageCapacityShares[0]; int counter = 0;
             foreach (var itemDescription in _itemDescriptionsOrdered)
             {
                 // Keep track of estimated demand for capacity within the class
                 aggregatedWeightedDemand += weightedItemDemand[itemDescription];
                 // Check whether this item description still virtually fits into the class
-                if (aggregatedWeightedDemand > aggregatedWeightedCapacity)
+                //if (aggregatedWeightedDemand > aggregatedWeightedCapacity)
+                if (counter > 0.2 * (_itemDescriptionsOrdered.Count - 1) && counter <= 0.5 * (_itemDescriptionsOrdered.Count - 1))
                 {
                     // Update current virtual capacity
-                    currentClass++;
-                    if (currentClass < _classCount)
-                        aggregatedWeightedCapacity += classStorageCapacityShares[currentClass];
+                    currentClass = 1;
+                    //if (currentClass < _classCount)
+                    //aggregatedWeightedCapacity += classStorageCapacityShares[currentClass];
+                }
+                else if (counter > 0.5 * (_itemDescriptionsOrdered.Count - 1))
+                {
+                    currentClass = 2;
                 }
                 // Assign the item to the current class
                 _itemClasses[itemDescription] = currentClass;
+                counter++;
             }
 
             // Log this reallocation
