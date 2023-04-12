@@ -76,7 +76,7 @@ namespace RAWSimO.Core.Control
         /// <param name="instance">The active instance.</param>
         /// <param name="bundle">The bundle to assign to a pod.</param>
         /// <returns>The selected pod.</returns>
-        public abstract Pod SelectPodForInititalInventory(Instance instance, ItemBundle bundle);
+        public abstract Compartment SelectPodForInititalInventory(Instance instance, ItemBundle bundle);
 
         /// <summary>
         /// Adds the transaction to the ready list.

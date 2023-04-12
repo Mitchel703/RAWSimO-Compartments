@@ -706,11 +706,11 @@ namespace RAWSimO.Core.Management
                 // Create bundle
                 ItemBundle bundle = GenerateBundle();
                 // Ask the current item storage manager for the pod to use, then assign it
-                Pod pod = Instance.Controller.StorageManager.SelectPodForInititalInventory(Instance, bundle);
-                if (!pod.Add(bundle))
+                Compartment compartment = Instance.Controller.StorageManager.SelectPodForInititalInventory(Instance, bundle);
+                if (!compartment.Add(bundle))
                     throw new InvalidOperationException("Could not assign bundle to the selected pod!");
                 // Notify the instance about the new bundle
-                Instance.NotifyInitialBundleStored(bundle, pod);
+                Instance.NotifyInitialBundleStored(bundle, compartment.Pod);
             }
         }
 

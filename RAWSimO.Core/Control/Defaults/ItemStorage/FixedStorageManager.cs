@@ -83,14 +83,15 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
         /// <param name="instance">The active instance.</param>
         /// <param name="bundle">The bundle to assign to a pod.</param>
         /// <returns>The selected pod.</returns>
-        public override Pod SelectPodForInititalInventory(Instance instance, ItemBundle bundle)
+        public override Compartment SelectPodForInititalInventory(Instance instance, ItemBundle bundle)
         {
-            // Just choose a pod as if the system was already running
-            Pod chosenPod = ChoosePod(bundle);
-            if (chosenPod == null)
-                throw new InvalidOperationException("Could not find a pod for the given bundle - are we at capacity?");
-            else
-                return chosenPod;
+            throw new NotImplementedException();
+            //// Just choose a pod as if the system was already running
+            //Pod chosenPod = ChoosePod(bundle);
+            //if (chosenPod == null)
+            //    throw new InvalidOperationException("Could not find a pod for the given bundle - are we at capacity?");
+            //else
+            //    return chosenPod;
         }
 
         /// <summary>

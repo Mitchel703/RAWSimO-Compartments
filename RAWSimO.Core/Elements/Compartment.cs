@@ -8,10 +8,11 @@ namespace RAWSimO.Core.Elements
 {
     public class Compartment
     {
-        public Compartment(string name, double capacity)
+        public Compartment(string name, double capacity, Pod pod)
         {
             Name = name;
             Capacity = capacity;
+            Pod = pod;
         }
 
         /// <summary>
@@ -22,6 +23,8 @@ namespace RAWSimO.Core.Elements
         /// The set of bundles registered for this pod.
         /// </summary>
         public IEnumerable<ItemBundle> RegisteredBundles { get { return _registeredBundles; } }
+
+        public Pod Pod { get; }
 
         internal string Name;
 
@@ -52,14 +55,15 @@ namespace RAWSimO.Core.Elements
                 throw new InvalidOperationException("Cannot reserve more capacity than this pod has!");
         }
 
-        public void Add(ItemBundle itemBundle, InsertRequest insertRequest = null)
+        public bool Add(ItemBundle itemBundle, InsertRequest insertRequest = null)
         {
                 // Keep track of weight
                 CapacityInUse += itemBundle.BundleWeight;
                 // Keep track of reserved space
                 _registeredBundles.Remove(itemBundle);
                 CapacityReserved = _registeredBundles.Sum(b => b.BundleWeight);
-                // Keep track of items actually contained in this pod
+            // Keep track of items actually contained in this pod
+            return true;
         }
 
         public bool FitsForReservation(ItemBundle bundle)

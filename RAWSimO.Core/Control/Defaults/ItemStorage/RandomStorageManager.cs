@@ -38,23 +38,11 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
         /// <param name="instance">The active instance.</param>
         /// <param name="bundle">The bundle to assign to a pod.</param>
         /// <returns>The selected pod.</returns>
-        public override Pod SelectPodForInititalInventory(Instance instance, ItemBundle bundle)
+        public override Compartment SelectPodForInititalInventory(Instance instance, ItemBundle bundle)
         {
-            var c = instance.Pods.SelectMany(p => p.CompartmentFitsForReservation(bundle))
+           return instance.Pods.SelectMany(p => p.CompartmentFitsForReservation(bundle))
                 .OrderBy(p => instance.Randomizer.NextDouble())
                 .First();
-            return c.Item2;
-            //var podIndex = new Random(DateTime.Now.Millisecond).Next(0, instance.Pods.Count - 1);
-            //var pod = instance.Pods[podIndex];
-            //var compartmentIndex = new Random(DateTime.Now.Millisecond).Next(0, availableCompartments - 1);
-            //var compartment = pod.Compartments[compartmentIndex];
-            //compartment.FitsForReservation(bundle);
-            //return pod;
-            //// Add to a random pod
-            //return instance.Pods
-            //    .Where(p => p.FitsForReservation(bundle))
-            //    .OrderBy(p => instance.Randomizer.NextDouble())
-            //    .First();
         }
 
         /// <summary>
@@ -87,15 +75,9 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
                 else
                 {
                     // Choose the next pod to use randomly
-                    var choosenOne = Instance.Pods.SelectMany(p => p.CompartmentFitsForReservation(bundle))
+                    chosenCompartment = Instance.Pods.SelectMany(p => p.CompartmentFitsForReservation(bundle))
                         .OrderBy(p => Instance.Randomizer.NextDouble())
                         .FirstOrDefault();
-                    chosenCompartment = choosenOne.Item1;
-                    chosenPod = choosenOne.Item2;
-                    //chosenCompartment = Instance.Pods
-                    //    .Where(b => b.FitsForReservation(bundle))
-                    //    .OrderBy(b => Instance.Randomizer.NextDouble())
-                    //    .FirstOrDefault();
                     _lastChosenPlace = Tuple.Create(chosenCompartment, chosenPod);
                 }
                 // If we found a pod, assign the bundle to it

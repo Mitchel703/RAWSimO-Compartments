@@ -38,13 +38,14 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
         /// <param name="instance">The active instance.</param>
         /// <param name="bundle">The bundle to assign to a pod.</param>
         /// <returns>The selected pod.</returns>
-        public override Pod SelectPodForInititalInventory(Instance instance, ItemBundle bundle)
+        public override Compartment SelectPodForInititalInventory(Instance instance, ItemBundle bundle)
         {
-            // Add to a random pod
-            return instance.Pods
-                .Where(p => p.FitsForReservation(bundle))
-                .OrderBy(p => instance.Randomizer.NextDouble())
-                .First();
+            throw new NotImplementedException();
+            //// Add to a random pod
+            //return instance.Pods
+            //    .Where(p => p.FitsForReservation(bundle))
+            //    .OrderBy(p => instance.Randomizer.NextDouble())
+            //    .First();
         }
         /// <summary>
         /// The config of this controller.
