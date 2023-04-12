@@ -28,8 +28,8 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
         private void PodHandled(Pod pod, InputStation iStation, OutputStation oStation)
         {
             // If the recycled pod was just handled at an input-station, do not assign any more bundles to it (we do not want to bring it back immediately after replenishing it)
-            if (pod == _lastChosenPod && iStation != null)
-                _lastChosenPod = null;
+            if (pod == _lastChosenPlace.Item2 && iStation != null)
+                _lastChosenPlace = null;
         }
 
         /// <summary>
@@ -40,12 +40,23 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
         /// <returns>The selected pod.</returns>
         public override Pod SelectPodForInititalInventory(Instance instance, ItemBundle bundle)
         {
-            // Add to a random pod
-            return instance.Pods
-                .Where(p => p.FitsForReservation(bundle))
+            var c = instance.Pods.SelectMany(p => p.CompartmentFitsForReservation(bundle))
                 .OrderBy(p => instance.Randomizer.NextDouble())
                 .First();
+            return c.Item2;
+            //var podIndex = new Random(DateTime.Now.Millisecond).Next(0, instance.Pods.Count - 1);
+            //var pod = instance.Pods[podIndex];
+            //var compartmentIndex = new Random(DateTime.Now.Millisecond).Next(0, availableCompartments - 1);
+            //var compartment = pod.Compartments[compartmentIndex];
+            //compartment.FitsForReservation(bundle);
+            //return pod;
+            //// Add to a random pod
+            //return instance.Pods
+            //    .Where(p => p.FitsForReservation(bundle))
+            //    .OrderBy(p => instance.Randomizer.NextDouble())
+            //    .First();
         }
+
         /// <summary>
         /// The config of this controller.
         /// </summary>
@@ -53,7 +64,7 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
         /// <summary>
         /// The last pod.
         /// </summary>
-        private Pod _lastChosenPod = null;
+        private Tuple<Compartment, Pod> _lastChosenPlace = null;
 
         /// <summary>
         /// This is called to decide about potentially pending bundles.
@@ -65,24 +76,30 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
             foreach (var bundle in _pendingBundles.ToArray())
             {
                 // Find a pod
+                Compartment chosenCompartment = null;
                 Pod chosenPod = null;
                 // Check whether we can recycle the last used pod
-                if (_config.StickToPodUntilFull && _lastChosenPod != null && _lastChosenPod.FitsForReservation(bundle))
+                if (_config.StickToPodUntilFull && _lastChosenPlace != null && _lastChosenPlace.Item1.FitsForReservation(bundle))
                 {
                     // Last chosen pod can be used for this bundle to
-                    chosenPod = _lastChosenPod;
+                    chosenCompartment = _lastChosenPlace.Item1;
                 }
                 else
                 {
                     // Choose the next pod to use randomly
-                    chosenPod = Instance.Pods
-                        .Where(b => b.FitsForReservation(bundle))
-                        .OrderBy(b => Instance.Randomizer.NextDouble())
+                    var choosenOne = Instance.Pods.SelectMany(p => p.CompartmentFitsForReservation(bundle))
+                        .OrderBy(p => Instance.Randomizer.NextDouble())
                         .FirstOrDefault();
-                    _lastChosenPod = chosenPod;
+                    chosenCompartment = choosenOne.Item1;
+                    chosenPod = choosenOne.Item2;
+                    //chosenCompartment = Instance.Pods
+                    //    .Where(b => b.FitsForReservation(bundle))
+                    //    .OrderBy(b => Instance.Randomizer.NextDouble())
+                    //    .FirstOrDefault();
+                    _lastChosenPlace = Tuple.Create(chosenCompartment, chosenPod);
                 }
                 // If we found a pod, assign the bundle to it
-                if (chosenPod != null)
+                if (chosenCompartment != null)
                     AddToReadyList(bundle, chosenPod);
             }
         }

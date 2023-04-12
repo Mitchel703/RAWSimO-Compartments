@@ -61,5 +61,10 @@ namespace RAWSimO.Core.Elements
                 CapacityReserved = _registeredBundles.Sum(b => b.BundleWeight);
                 // Keep track of items actually contained in this pod
         }
+
+        public bool FitsForReservation(ItemBundle bundle)
+        {
+            return CapacityInUse + CapacityReserved + bundle.BundleWeight <= Capacity;
+        }
     }
 }

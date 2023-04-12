@@ -274,6 +274,15 @@ namespace RAWSimO.Core.Elements
             return compartment.CapacityInUse + compartment.CapacityReserved + bundle.BundleWeight <= compartment.Capacity; 
         }
 
+        public List<Tuple<Compartment, Pod>> CompartmentFitsForReservation(ItemBundle bundle)
+        {
+
+            return this.Compartments
+                .Where(compartment => compartment.CapacityInUse + compartment.CapacityReserved + bundle.BundleWeight <= compartment.Capacity)
+                .Select(c => Tuple.Create(c, this))
+                .ToList();
+        }
+
         #endregion
 
         #region Statistics
