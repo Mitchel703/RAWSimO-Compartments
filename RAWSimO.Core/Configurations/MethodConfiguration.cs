@@ -335,7 +335,7 @@ namespace RAWSimO.Core.Configurations
             PathPlanningConfig = new FARPathPlanningConfiguration();
             TaskAllocationConfig = new BalancedTaskAllocationConfiguration();
             StationActivationConfig = new ActivateAllStationActivationConfiguration();
-            ItemStorageConfig = new EmptiestItemStorageConfiguration();
+            ItemStorageConfig = new RandomItemStorageConfiguration();// new EmptiestItemStorageConfiguration();
             PodStorageConfig = new NearestPodStorageConfiguration();
             RepositioningConfig = new DummyRepositioningConfiguration();
             OrderBatchingConfig = new PodMatchingOrderBatchingConfiguration();
