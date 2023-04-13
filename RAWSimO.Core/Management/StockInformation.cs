@@ -93,7 +93,7 @@ namespace RAWSimO.Core.Management
         private void SignalNewPod(Pod pod)
         {
             // Update overall load information
-            OverallLoadCapacity += pod.Compartments.First().Capacity;
+            OverallLoadCapacity += pod.Compartments.Sum(c=> c.Capacity);
         }
 
         private void SignalItemExtracted(Pod pod, ItemDescription item)
