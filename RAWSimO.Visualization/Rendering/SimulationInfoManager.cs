@@ -467,6 +467,7 @@ namespace RAWSimO.Visualization.Rendering
 
         public void UpdateContentInfo()
         {
+            //this method is displaying content of a pod (if any)
             // Update the visual controls
             foreach (var item in _pod.GetInfoInstance().GetInfoItemDescriptions())
             {

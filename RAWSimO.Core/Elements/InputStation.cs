@@ -190,6 +190,7 @@ namespace RAWSimO.Core.Elements
                 if (_itemBundles.Contains(bundle))
                 {
                     // Transfer bundle, wait until transfer is complete, remove request
+                    //TODO: here we add bundle to pod and in Add method always first compartment is used
                     pod.Add(bundle, request);
                     if (Instance.SettingConfig.VisualizationAttached)
                         lock (_syncRoot)
