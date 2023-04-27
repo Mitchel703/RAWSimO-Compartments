@@ -65,7 +65,6 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
             {
                 // Find a pod
                 Compartment chosenCompartment = null;
-                Pod chosenPod = null;
                 // Check whether we can recycle the last used pod
                 if (_config.StickToPodUntilFull && _lastChosenPlace != null && _lastChosenPlace.Item1.FitsForReservation(bundle))
                 {
@@ -78,11 +77,11 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
                     chosenCompartment = Instance.Pods.SelectMany(p => p.CompartmentFitsForReservation(bundle))
                         .OrderBy(p => Instance.Randomizer.NextDouble())
                         .FirstOrDefault();
-                    _lastChosenPlace = Tuple.Create(chosenCompartment, chosenPod);
+                    _lastChosenPlace = Tuple.Create(chosenCompartment, chosenCompartment.Pod);
                 }
                 // If we found a pod, assign the bundle to it
                 if (chosenCompartment != null)
-                    AddToReadyList(bundle, chosenPod);
+                    AddToReadyList(bundle, chosenCompartment.Pod);
             }
         }
 
