@@ -123,7 +123,7 @@ namespace RAWSimO.Core.Control
         internal bool IsAboveRefillThreshold(Pod pod)
         {
             return
-                (pod.Compartments.First().CapacityInUse + pod.Compartments.First().CapacityReserved) / pod.Compartments.First().Capacity >= GetStorageBufferThreshold(pod) ||
+                (pod.GetInfoCapacityUsed() + pod.GetInfoCapacityReserved()) / pod.GetInfoCapacity() >= GetStorageBufferThreshold(pod) ||
                 Instance.Controller.CurrentTime - GetLastBufferingTime(pod) >= GetStorageBufferTimeout(pod);
         }
         /// <summary>
@@ -136,7 +136,7 @@ namespace RAWSimO.Core.Control
         {
             return
                 // Check whether we are above the capacity threshold
-                (pod.Compartments.First().CapacityInUse + pod.Compartments.First().CapacityReserved + newBundle.BundleWeight) / pod.Compartments.First().Capacity >= GetStorageBufferThreshold(pod) ||
+                (pod.GetInfoCapacityUsed() + pod.GetInfoCapacityReserved() + newBundle.BundleWeight) / pod.GetInfoCapacity() >= GetStorageBufferThreshold(pod) ||
                 // Additionally check for a buffering timeout
                 Instance.Controller.CurrentTime - GetLastBufferingTime(pod) >= GetStorageBufferTimeout(pod);
         }
