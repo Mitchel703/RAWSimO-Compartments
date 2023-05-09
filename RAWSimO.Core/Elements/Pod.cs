@@ -164,9 +164,8 @@ namespace RAWSimO.Core.Elements
         /// <param name="itemBundle">The item-bundle to add.</param>
         /// <param name="insertRequest">The corresponding insertion request, if available.</param>
         /// <returns><code>true</code> if the item was added successfully, <code>false</code> otherwise.</returns>
-        public bool Add(ItemBundle itemBundle, InsertRequest insertRequest = null)
+        public bool Add(Compartment choosenCompartment, ItemBundle itemBundle, InsertRequest insertRequest = null)
         {
-            var choosenCompartment = Compartments.First();
             // Signal change
             _changed = true;
             // Init, if not done yet

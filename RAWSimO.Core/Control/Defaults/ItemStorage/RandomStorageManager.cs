@@ -40,9 +40,16 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
         /// <returns>The selected pod.</returns>
         public override Compartment SelectPodForInititalInventory(Instance instance, ItemBundle bundle)
         {
-           return instance.Pods.SelectMany(p => p.CompartmentFitsForReservation(bundle))
-                .OrderBy(p => instance.Randomizer.NextDouble())
-                .First();
+            return instance.Pods.SelectMany(p => p.CompartmentFitsForReservation(bundle))
+                 .OrderBy(p => instance.Randomizer.NextDouble())
+                 .First();
+        }
+
+        public Compartment SelectPodForInititalInventory(Instance instance, ItemBundle bundle, Pod pod)
+        {
+            return pod.CompartmentFitsForReservation(bundle)
+                 .OrderBy(p => instance.Randomizer.NextDouble())
+                 .First();
         }
 
         /// <summary>

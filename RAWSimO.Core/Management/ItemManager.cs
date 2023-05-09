@@ -701,15 +701,18 @@ namespace RAWSimO.Core.Management
         private void InitializePodContentsRandomly(double initialInventory)
         {
             // Add stuff to pods
-            while (Instance.Pods.Sum(p => p.Compartments.Sum(c=> c.CapacityInUse)) 
-                / Instance.Pods.Sum(p => p.Compartments.Sum(c=>c.Capacity)) 
+            while (Instance.Pods.Sum(p => p.Compartments.Sum(c => c.CapacityInUse))
+                / Instance.Pods.Sum(p => p.Compartments.Sum(c => c.Capacity))
                 < initialInventory)
             {
                 // Create bundle
                 ItemBundle bundle = GenerateBundle();
                 // Ask the current item storage manager for the pod to use, then assign it
                 Compartment compartment = Instance.Controller.StorageManager.SelectPodForInititalInventory(Instance, bundle);
-                if (!compartment.Add(bundle))
+
+                //compartment.Pod.Add(compartment, bundle);
+
+                if (!compartment.Pod.Add(compartment, bundle))
                     throw new InvalidOperationException("Could not assign bundle to the selected pod!");
                 // Notify the instance about the new bundle
                 Instance.NotifyInitialBundleStored(bundle, compartment.Pod);
