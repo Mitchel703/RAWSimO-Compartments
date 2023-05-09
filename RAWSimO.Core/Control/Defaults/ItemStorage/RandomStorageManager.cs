@@ -28,7 +28,7 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
         private void PodHandled(Pod pod, InputStation iStation, OutputStation oStation)
         {
             // If the recycled pod was just handled at an input-station, do not assign any more bundles to it (we do not want to bring it back immediately after replenishing it)
-            if (pod == _lastChosenPlace.Item2 && iStation != null)
+            if (_lastChosenPlace != null && pod == _lastChosenPlace.Item2 && iStation != null)
                 _lastChosenPlace = null;
         }
 
