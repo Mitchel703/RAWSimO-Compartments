@@ -88,7 +88,7 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
                 }
                 // If we found a pod, assign the bundle to it
                 if (chosenCompartment != null)
-                    AddToReadyList(bundle, chosenCompartment.Pod);
+                    AddToReadyList(bundle, chosenCompartment);
             }
         }
 
@@ -103,6 +103,8 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
         /// </summary>
         /// <param name="pod">The pod to get the timeout value for.</param>
         /// <returns>The buffer timeout.</returns>
+        protected override double GetStorageBufferTimeout(Compartment compartment) { return _config.BufferTimeout; }
+
         protected override double GetStorageBufferTimeout(Pod pod) { return _config.BufferTimeout; }
 
         #region IOptimize Members

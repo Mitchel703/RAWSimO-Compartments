@@ -41,11 +41,11 @@ namespace RAWSimO.Core.Control
         /// <summary>
         /// All decided but not yet allocated bundles.
         /// </summary>
-        private Dictionary<Pod, List<ItemBundle>> _bufferedBundles = new Dictionary<Pod, List<ItemBundle>>();
+        private Dictionary<Compartment, List<ItemBundle>> _bufferedBundles = new Dictionary<Compartment, List<ItemBundle>>();
         /// <summary>
         /// The last times at which bundles were buffered for the specific pods.
         /// </summary>
-        private Dictionary<Pod, double> _bufferedBundlesTimes = new Dictionary<Pod, double>();
+        private Dictionary<Compartment, double> _bufferedBundlesTimes = new Dictionary<Compartment, double>();
 
         /// <summary>
         /// Indicates that new storage, that wasn't investigated previously, is available.
@@ -69,7 +69,10 @@ namespace RAWSimO.Core.Control
         /// </summary>
         /// <param name="pod">The pod to get the timeout value for.</param>
         /// <returns>The buffer timeout.</returns>
+        protected abstract double GetStorageBufferTimeout(Compartment compartment);
+
         protected abstract double GetStorageBufferTimeout(Pod pod);
+
         /// <summary>
         /// Selects a pod for a bundle generated during initialization.
         /// </summary>
@@ -82,63 +85,74 @@ namespace RAWSimO.Core.Control
         /// Adds the transaction to the ready list.
         /// </summary>
         /// <param name="bundle">The bundle that is going to be transferred.</param>
-        /// <param name="pod">The pod the bundle is transferred to.</param>
-        protected void AddToReadyList(ItemBundle bundle, Pod pod)
+        /// <param name="compartment">The pod the bundle is transferred to.</param>
+        protected void AddToReadyList(ItemBundle bundle, Compartment compartment)
         {
-            if (!IsAboveRefillThreshold(pod, bundle))
+            if (!IsAboveRefillThreshold(compartment, bundle))
             {
                 // Add decision to buffer list
-                if (_bufferedBundles.ContainsKey(pod))
-                    _bufferedBundles[pod].Add(bundle);
+                if (_bufferedBundles.ContainsKey(compartment))
+                    _bufferedBundles[compartment].Add(bundle);
                 else
-                    _bufferedBundles.Add(pod, new List<ItemBundle> { bundle });
+                    _bufferedBundles.Add(compartment, new List<ItemBundle> { bundle });
                 // Remember this buffering
-                _bufferedBundlesTimes[pod] = Instance.Controller.CurrentTime;
+                _bufferedBundlesTimes[compartment] = Instance.Controller.CurrentTime;
             }
             else
             {
                 // Immediately submit the decision instead of buffering it
-                Instance.Controller.Allocator.Submit(bundle, pod);
+                Instance.Controller.Allocator.Submit(bundle, compartment);
             }
 
             // Remove the bundle from the list of pending ones (if it was immediately assigned this operation is actually redundant)
             _pendingBundles.Remove(bundle);
             // Also notify the pod about the new bundle
-            pod.RegisterBundle(bundle);
+            compartment.RegisterBundle(bundle);
             // Notify the instance about the decision
-            Instance.NotifyItemStorageDecided(pod, bundle);
+            Instance.NotifyItemStorageDecided(compartment.Pod, bundle);
         }
 
         /// <summary>
         /// Returns the last time a bundle was buffered for the given pod.
         /// </summary>
-        /// <param name="pod">The pod to check.</param>
+        /// <param name="copmartment">The pod to check.</param>
         /// <returns>The last time a bundle was buffered for the pod or max-value, if no buffering happened lately for the pod.</returns>
-        private double GetLastBufferingTime(Pod pod) { return _bufferedBundlesTimes.ContainsKey(pod) ? _bufferedBundlesTimes[pod] : double.MaxValue; }
+        private double GetLastBufferingTime(Compartment copmartment) { return _bufferedBundlesTimes.ContainsKey(copmartment) ? _bufferedBundlesTimes[copmartment] : double.MaxValue; }
+
+        private double GetLastBufferingTime(Pod pod) { return _bufferedBundlesTimes.Any(x=> x.Key.Pod == pod) ? _bufferedBundlesTimes.First(x=>x.Key.Pod == pod).Value : double.MaxValue; }
+
         /// <summary>
         /// Checks whether the given pod is ready for refill or has to be buffered some more.
         /// </summary>
-        /// <param name="pod">The pod to check.</param>
+        /// <param name="compartment">The pod to check.</param>
         /// <returns><code>true</code> if the pod is ready to be refilled, <code>false</code> otherwise.</returns>
+        internal bool IsAboveRefillThreshold(Compartment compartment)
+        {
+            return
+                (compartment.CapacityInUse + compartment.CapacityReserved) / compartment.Capacity >= GetStorageBufferThreshold(compartment.Pod) ||
+                Instance.Controller.CurrentTime - GetLastBufferingTime(compartment) >= GetStorageBufferTimeout(compartment);
+        }
+
         internal bool IsAboveRefillThreshold(Pod pod)
         {
             return
                 (pod.GetInfoCapacityUsed() + pod.GetInfoCapacityReserved()) / pod.GetInfoCapacity() >= GetStorageBufferThreshold(pod) ||
                 Instance.Controller.CurrentTime - GetLastBufferingTime(pod) >= GetStorageBufferTimeout(pod);
         }
+
         /// <summary>
         /// Checks whether the given pod is ready for refill or has to be buffered some more.
         /// </summary>
-        /// <param name="pod">The pod to check.</param>
+        /// <param name="c">The pod to check.</param>
         /// <param name="newBundle">The additional bundle to take into account.</param>
         /// <returns><code>true</code> if the pod is ready to be refilled, <code>false</code> otherwise.</returns>
-        private bool IsAboveRefillThreshold(Pod pod, ItemBundle newBundle)
+        private bool IsAboveRefillThreshold(Compartment c, ItemBundle newBundle)
         {
             return
                 // Check whether we are above the capacity threshold
-                (pod.GetInfoCapacityUsed() + pod.GetInfoCapacityReserved() + newBundle.BundleWeight) / pod.GetInfoCapacity() >= GetStorageBufferThreshold(pod) ||
+                (c.CapacityInUse + c.CapacityReserved + newBundle.BundleWeight) / c.Capacity >= GetStorageBufferThreshold(c.Pod) ||
                 // Additionally check for a buffering timeout
-                Instance.Controller.CurrentTime - GetLastBufferingTime(pod) >= GetStorageBufferTimeout(pod);
+                Instance.Controller.CurrentTime - GetLastBufferingTime(c) >= GetStorageBufferTimeout(c);
         }
         /// <summary>
         /// Submits all decisions about buffered pods above their buffer threshold to the system.
@@ -146,22 +160,40 @@ namespace RAWSimO.Core.Control
         private void SubmitBufferedBundles()
         {
             // Get all pods that are above their buffer theshold
-            IEnumerable<Pod> aboveThresholdPods = _bufferedBundles.Keys.Where(p => IsAboveRefillThreshold(p));
+            var aboveThresholdPods = _bufferedBundles.Keys.Where(p => IsAboveRefillThreshold(p));
 
             // Check whether there are any pods above threshold
             if (aboveThresholdPods.Any())
             {
                 // Iterate pods that are ready
-                foreach (var pod in aboveThresholdPods.ToArray())
+                foreach (var compartment in aboveThresholdPods.ToArray())
                 {
                     // Submit decision of ready bundles
-                    _bufferedBundles[pod].ForEach(b => Instance.Controller.Allocator.Submit(b, pod));
+                    _bufferedBundles[compartment].ForEach(b => Instance.Controller.Allocator.Submit(b, compartment));
                     // Remove from buffer
-                    _bufferedBundles.Remove(pod);
+                    _bufferedBundles.Remove(compartment);
                     // Remove last buffering timestamp
-                    _bufferedBundlesTimes.Remove(pod);
+                    _bufferedBundlesTimes.Remove(compartment);
                 }
             }
+
+            //// Get all pods that are above their buffer theshold
+            //IEnumerable<Pod> aboveThresholdPods = _bufferedBundles.Keys.Where(p => IsAboveRefillThreshold(p));
+
+            //// Check whether there are any pods above threshold
+            //if (aboveThresholdPods.Any())
+            //{
+            //    // Iterate pods that are ready
+            //    foreach (var pod in aboveThresholdPods.ToArray())
+            //    {
+            //        // Submit decision of ready bundles
+            //        _bufferedBundles[pod].ForEach(b => Instance.Controller.Allocator.Submit(b, pod));
+            //        // Remove from buffer
+            //        _bufferedBundles.Remove(pod);
+            //        // Remove last buffering timestamp
+            //        _bufferedBundlesTimes.Remove(pod);
+            //    }
+            //}
         }
 
         /// <summary>

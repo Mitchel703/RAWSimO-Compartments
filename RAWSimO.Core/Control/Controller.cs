@@ -42,12 +42,12 @@ namespace RAWSimO.Core.Control
             // Init bot manager
             switch (instance.ControllerConfig.TaskAllocationConfig.GetMethodType())
             {
-                case TaskAllocationMethodType.BruteForce: BotManager = new BruteForceBotManager(instance); break;
-                case TaskAllocationMethodType.Random: BotManager = new RandomBotManager(instance); break;
+                //case TaskAllocationMethodType.BruteForce: BotManager = new BruteForceBotManager(instance); break;
+                //case TaskAllocationMethodType.Random: BotManager = new RandomBotManager(instance); break;
                 case TaskAllocationMethodType.Balanced: BotManager = new BalancedBotManager(instance); break;
-                case TaskAllocationMethodType.Swarm: BotManager = new SwarmBotManager(instance); break;
-                case TaskAllocationMethodType.ConstantRatio: BotManager = new ConstantRatioBotManager(instance); break;
-                case TaskAllocationMethodType.Concept: BotManager = new ConceptBotManager(instance); break;
+                //case TaskAllocationMethodType.Swarm: BotManager = new SwarmBotManager(instance); break;
+                //case TaskAllocationMethodType.ConstantRatio: BotManager = new ConstantRatioBotManager(instance); break;
+                //case TaskAllocationMethodType.Concept: BotManager = new ConceptBotManager(instance); break;
                 default: throw new ArgumentException("Unknown bot manager: " + instance.ControllerConfig.TaskAllocationConfig.GetMethodType());
             }
             // Init station manager
@@ -62,15 +62,15 @@ namespace RAWSimO.Core.Control
             // Init item storage manager
             switch (instance.ControllerConfig.ItemStorageConfig.GetMethodType())
             {
-                case ItemStorageMethodType.Dummy: StorageManager = new DummyStorageManager(instance); break;
+                //case ItemStorageMethodType.Dummy: StorageManager = new DummyStorageManager(instance); break;
                 case ItemStorageMethodType.Random: StorageManager = new RandomStorageManager(instance); break;
-                case ItemStorageMethodType.Correlative: StorageManager = new CorrelativeStorageManager(instance); break;
-                case ItemStorageMethodType.Fixed: StorageManager = new FixedStorageManager(instance); break;
-                case ItemStorageMethodType.Turnover: StorageManager = new TurnoverStorageManager(instance); break;
-                case ItemStorageMethodType.ClosestLocation: StorageManager = new ClosestLocationStorageManager(instance); break;
-                case ItemStorageMethodType.Reactive: StorageManager = new ReactiveStorageManager(instance); break;
-                case ItemStorageMethodType.Emptiest: StorageManager = new EmptiestStorageManager(instance); break;
-                case ItemStorageMethodType.LeastDemand: StorageManager = new LeastDemandStorageManager(instance); break;
+                //case ItemStorageMethodType.Correlative: StorageManager = new CorrelativeStorageManager(instance); break;
+                //case ItemStorageMethodType.Fixed: StorageManager = new FixedStorageManager(instance); break;
+                //case ItemStorageMethodType.Turnover: StorageManager = new TurnoverStorageManager(instance); break;
+                //case ItemStorageMethodType.ClosestLocation: StorageManager = new ClosestLocationStorageManager(instance); break;
+                //case ItemStorageMethodType.Reactive: StorageManager = new ReactiveStorageManager(instance); break;
+                //case ItemStorageMethodType.Emptiest: StorageManager = new EmptiestStorageManager(instance); break;
+                //case ItemStorageMethodType.LeastDemand: StorageManager = new LeastDemandStorageManager(instance); break;
                 default: throw new ArgumentException("Unknown storage manager: " + instance.ControllerConfig.ItemStorageConfig.GetMethodType());
             }
             // Init pod storage manager

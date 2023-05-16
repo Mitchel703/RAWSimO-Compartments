@@ -363,7 +363,7 @@ namespace RAWSimO.Core
         /// </summary>
         /// <param name="pod">The pod the bundle was assigned to.</param>
         /// <param name="bundle">The bundle that was assigned.</param>
-        public delegate void ItemStorageAllocationAvailableEventHandler(Pod pod, ItemBundle bundle);
+        public delegate void ItemStorageAllocationAvailableEventHandler(Compartment pod, ItemBundle bundle);
         /// <summary>
         /// The event that is raised when a bundle was submitted for allocation to a pod.
         /// </summary>
@@ -371,10 +371,10 @@ namespace RAWSimO.Core
         /// <summary>
         /// Notifies the instance that a bundle was submitted for allocation to a pod.
         /// </summary>
-        internal void NotifyItemStorageAllocationAvailable(Pod pod, ItemBundle bundle)
+        internal void NotifyItemStorageAllocationAvailable(Compartment compartment, ItemBundle bundle)
         {
             // Raise the event
-            ItemStorageAllocationAvailable?.Invoke(pod, bundle);
+            ItemStorageAllocationAvailable?.Invoke(compartment, bundle);
         }
 
         #endregion

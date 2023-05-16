@@ -281,9 +281,9 @@ namespace RAWSimO.Core
         /// </summary>
         private void InitStorageTracking()
         {
-            _storageCapacity = Pods.Sum(p => p.Compartments.First().Capacity);
-            _storageUsage = Pods.Sum(p => p.Compartments.First().CapacityInUse);
-            _storageReserved = Pods.Sum(p => p.Compartments.First().CapacityReserved);
+            _storageCapacity = Pods.Sum(p => p.Compartments.Sum(x=>x.Capacity));
+            _storageUsage = Pods.Sum(p => p.Compartments.Sum(x => x.CapacityInUse));
+            _storageReserved = Pods.Sum(p => p.Compartments.Sum(x => x.CapacityReserved));
             _storageBacklog = 0;
         }
         /// <summary>

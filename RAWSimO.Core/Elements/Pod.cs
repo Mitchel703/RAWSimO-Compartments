@@ -119,11 +119,28 @@ namespace RAWSimO.Core.Elements
         /// <param name="bundle">The bundle for which capacity shall be reserved.</param>
         internal void RegisterBundle(ItemBundle bundle)
         {
-            //TODO: pick appropriate compartment
-            var chosenCompartment = Compartments.First();
-            chosenCompartment.RegisterBundle(bundle);
-            // Notify the instance about the reservation
-            Instance.NotifyBundleRegistered(this, bundle);
+            var registered = false;
+            //TODO: radomize?
+            foreach (var chosenCompartment in Compartments)
+            {
+                try
+                {
+                    chosenCompartment.RegisterBundle(bundle);
+                    // Notify the instance about the reservation
+                    Instance.NotifyBundleRegistered(this, bundle);
+                    registered = true;
+                    break;
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+
+            if (!registered)
+            {
+                throw new InvalidOperationException("Cannot reserve more capacity than this pod has (in any compartment)!");
+            }
         }
 
         /// <summary>
@@ -267,10 +284,11 @@ namespace RAWSimO.Core.Elements
         /// </summary>
         /// <param name="bundle">The bundle that has to be checked.</param>
         /// <returns><code>true</code> if the bundle fits, <code>false</code> otherwise.</returns>
-        public bool FitsForReservation(ItemBundle bundle) { 
+        public bool FitsForReservation(ItemBundle bundle)
+        {
             var compartment = Compartments.First();
 
-            return compartment.CapacityInUse + compartment.CapacityReserved + bundle.BundleWeight <= compartment.Capacity; 
+            return compartment.CapacityInUse + compartment.CapacityReserved + bundle.BundleWeight <= compartment.Capacity;
         }
 
         public List<Compartment> CompartmentFitsForReservation(ItemBundle bundle)
@@ -512,7 +530,7 @@ namespace RAWSimO.Core.Elements
         /// <returns>The capacity of the pod.</returns>
         public double GetInfoCapacity() { return Compartments.Sum(x => x.Capacity); }
 
-        public List<double> GetInfoCompartmentCapacity() { return Compartments.Select(x=>x.Capacity).ToList(); }
+        public List<double> GetInfoCompartmentCapacity() { return Compartments.Select(x => x.Capacity).ToList(); }
 
 
         /// <summary>

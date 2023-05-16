@@ -34,22 +34,22 @@ namespace RAWSimO.Core.Control
         /// <summary>
         /// All decided but not yet allocated bundle to pod assignments.
         /// </summary>
-        private Dictionary<ItemBundle, Pod> _podAssignments = new Dictionary<ItemBundle, Pod>();
+        private Dictionary<ItemBundle, Compartment> _podAssignments = new Dictionary<ItemBundle, Compartment>();
 
         /// <summary>
         /// Allocates the input request.
         /// </summary>
         /// <param name="bundle">The bundle to allocate.</param>
-        /// <param name="pod">The pod the bundle shall be stored in.</param>
+        /// <param name="compartment">The pod the bundle shall be stored in.</param>
         /// <param name="station">The station that shall handle the bundle.</param>
-        private void Allocate(ItemBundle bundle, Pod pod, InputStation station)
+        private void Allocate(ItemBundle bundle, Compartment compartment, InputStation station)
         {
             // Indicate change at instance
             Instance.Changed = true;
             // Check whether decision is possible
             if (station.CapacityInUse + bundle.BundleWeight > station.Capacity)
                 throw new InvalidOperationException("Allocating the bundle to the station would exceed its capacity!");
-            if (Instance.ControllerConfig.ItemStorageConfig.GetMethodType() != ItemStorageMethodType.Dummy && pod.Compartments.First().CapacityInUse + bundle.BundleWeight > pod.Compartments.First().Capacity)
+            if (Instance.ControllerConfig.ItemStorageConfig.GetMethodType() != ItemStorageMethodType.Dummy && compartment.CapacityInUse + bundle.BundleWeight > compartment.Capacity)
                 throw new InvalidOperationException("Allocating the bundle to the pod would exceed its capacity!");
             // Remove from ready lists
             _iStationAssignments.Remove(bundle);
@@ -57,9 +57,9 @@ namespace RAWSimO.Core.Control
             // Add the bundle to the station
             station.Add(bundle);
             // Mark the pod at the bundle
-            bundle.Pod = pod;
+            bundle.Pod = compartment.Pod;
             // Add storage request
-            Instance.ResourceManager.NewItemBundleAssignedToStation(bundle, station, pod);
+            Instance.ResourceManager.NewItemBundleAssignedToStation(bundle, station, compartment);
             // Notify item manager
             Instance.ItemManager.NewBundleAssignedToStation(station, bundle);
             // Remove bundle from item manager
@@ -103,13 +103,13 @@ namespace RAWSimO.Core.Control
         /// Submits a new bundle storage assignment decision to the allocator.
         /// </summary>
         /// <param name="bundle">The bundle that is being assigned to a storage pod.</param>
-        /// <param name="pod">The pod in which the bundle shall be stored.</param>
-        public void Submit(ItemBundle bundle, Pod pod)
+        /// <param name="compartment">The pod in which the bundle shall be stored.</param>
+        public void Submit(ItemBundle bundle, Compartment compartment)
         {
             // Store assignment until the next allocation update
-            _podAssignments[bundle] = pod;
+            _podAssignments[bundle] = compartment;
             // Notify instance about final decision
-            Instance.NotifyItemStorageAllocationAvailable(pod, bundle);
+            Instance.NotifyItemStorageAllocationAvailable(compartment, bundle);
         }
         /// <summary>
         /// Adds an order to the queue of a station. This is only done for information tracking purposes. The actual decision submission has to be done separately by the respective controller.

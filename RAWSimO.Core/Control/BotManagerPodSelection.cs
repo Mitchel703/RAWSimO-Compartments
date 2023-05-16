@@ -77,24 +77,24 @@ namespace RAWSimO.Core.Control
         /// <summary>
         /// Checks whether any request matches the combination of pod and station, i.e. whether any work can be done with the pod at the station.
         /// </summary>
-        /// <param name="pod">The pod to check.</param>
+        /// <param name="p">The pod to check.</param>
         /// <param name="station">The station to check.</param>
         /// <returns>Returns <code>true</code> when there is work that can be done with this combination, <code>false</code> otherwise.</returns>
-        internal bool AnyRelevantRequests(Pod pod, InputStation station)
+        internal bool AnyRelevantRequests(Pod p, InputStation station)
         {
             // Search for any storage request of the station matching the pod
-            return Instance.ResourceManager.GetStoreRequestsOfStation(station).Any(r => r.Pod == pod);
+            return Instance.ResourceManager.GetStoreRequestsOfStation(station).Any(r => r.Compartment.Pod == p);
         }
 
         /// <summary>
         /// Returns a list of relevant store-requests for the given pod / input-station combination.
         /// </summary>
-        /// <param name="pod">The pod in focus.</param>
+        /// <param name="p">The pod in focus.</param>
         /// <param name="station">The station in focus.</param>
         /// <returns>A list of store-requests for bundles that can be put on the pod.</returns>
-        internal List<InsertRequest> GetPossibleRequests(Pod pod, InputStation station)
+        internal List<InsertRequest> GetPossibleRequests(Pod p, InputStation station)
         {
-            return Instance.ResourceManager.GetStoreRequestsOfStation(station).Where(r => r.Pod == pod).ToList();
+            return Instance.ResourceManager.GetStoreRequestsOfStation(station).Where(r => r.Compartment.Pod == p).ToList();
         }
 
         /// <summary>
@@ -323,12 +323,12 @@ namespace RAWSimO.Core.Control
             if (config.IncludeAge)
                 // Measure work amount by also including the time the bundle was already present at the station
                 value = -Instance.ResourceManager.GetStoreRequestsOfStation(station)
-                    .Where(r => r.Pod == bot.Pod)
+                    .Where(r => r.Compartment.Pod == bot.Pod)
                     .Sum(r => Instance.Controller.CurrentTime - r.Bundle.TimeStampSubmit);
             else
                 // Measure work by only considering the number of bundles that can be put on the pod
                 value = -Instance.ResourceManager.GetStoreRequestsOfStation(station)
-                    .Where(r => r.Pod == bot.Pod)
+                    .Where(r => r.Compartment.Pod == bot.Pod)
                     .Count();
             // Penalize stations that are on a different tier
             if (config.PreferSameTier && bot.Tier != station.Tier)
@@ -517,29 +517,29 @@ namespace RAWSimO.Core.Control
         /// </summary>
         /// <param name="config">The config specifying further parameters.</param>
         /// <param name="bot">The bot.</param>
-        /// <param name="pod">The pod.</param>
+        /// <param name="p">The pod.</param>
         /// <param name="station">The station.</param>
         /// <returns>A score that can be used to decide about the best assignment. Minimization / Smaller is better.</returns>
-        public double Score(PCScorerPodForIStationBotWorkAmount config, Bot bot, Pod pod, InputStation station)
+        public double Score(PCScorerPodForIStationBotWorkAmount config, Bot bot, Pod p, InputStation station)
         {
             // Determine score
             double value;
             if (config.IncludeAge)
                 // Measure work amount by also including the time the bundle was already present at the station
                 value = -Instance.ResourceManager.GetStoreRequestsOfStation(station)
-                    .Where(r => r.Pod == pod)
+                    .Where(r => r.Compartment.Pod == p)
                     .Sum(r => Instance.Controller.CurrentTime - r.Bundle.TimeStampSubmit);
             else
                 // Measure work by only considering the number of bundles that can be put on the pod
                 value = -Instance.ResourceManager.GetStoreRequestsOfStation(station)
-                    .Where(r => r.Pod == pod)
+                    .Where(r => r.Compartment.Pod == p)
                     .Count();
             // Penalize entities that are on different tiers
             if (config.PreferSameTier)
             {
-                if (bot.Tier != pod.Tier && pod.Tier != station.Tier)
+                if (bot.Tier != p.Tier && p.Tier != station.Tier)
                     value += 2 * WrongTierPenaltyForBundleWorkAmount;
-                else if (bot.Tier != pod.Tier || pod.Tier != station.Tier)
+                else if (bot.Tier != p.Tier || p.Tier != station.Tier)
                     value += WrongTierPenaltyForBundleWorkAmount;
             }
             return value;

@@ -69,9 +69,9 @@ namespace RAWSimO.Core.Control.Defaults.ReplenishmentBatching
         ///// <summary>
         ///// All bundles that are assigned to a pod.
         ///// </summary>
-        private Dictionary<ItemBundle, Pod> _bundleToPod = new Dictionary<ItemBundle, Pod>();
-        private Dictionary<Pod, List<ItemBundle>> _podBundles = new Dictionary<Pod, List<ItemBundle>>();
-        private Dictionary<Pod, double> _waitingTime = new Dictionary<Pod, double>();
+        private Dictionary<ItemBundle, Compartment> _bundleToPod = new Dictionary<ItemBundle, Compartment>();
+        private Dictionary<Compartment, List<ItemBundle>> _podBundles = new Dictionary<Compartment, List<ItemBundle>>();
+        private Dictionary<Compartment, double> _waitingTime = new Dictionary<Compartment, double>();
         /// <summary>
         /// The station chosen last time for the pod.
         /// </summary>
@@ -91,7 +91,7 @@ namespace RAWSimO.Core.Control.Defaults.ReplenishmentBatching
                 {
                     // Check which pod was used to store the bundle
                     ItemBundle bundle = _itemBundles[i];
-                    Pod podForBundle = _bundleToPod[bundle];
+                    Pod podForBundle = _bundleToPod[bundle].Pod;
                     // See whether we already have a station in memory for this pod
                     InputStation chosenStation;
                     if (_lastChosenStations.ContainsKey(podForBundle))
@@ -168,7 +168,7 @@ namespace RAWSimO.Core.Control.Defaults.ReplenishmentBatching
             else
             {
                 // Assign batches in the order they arrive in
-                List<Pod> removedBatches = null;
+                List<Compartment> removedBatches = null;
                 foreach (var batch in _podBundles.OrderBy(p => _waitingTime[p.Key]))
                 {
                     double batchSize = batch.Value.Sum(b => b.BundleWeight);
@@ -177,7 +177,7 @@ namespace RAWSimO.Core.Control.Defaults.ReplenishmentBatching
                         // Only active stations where the complete bundle fits
                         .Where(s => s.Active && batchSize <= s.RemainingCapacity)
                         // Only stations that are located on the same tier as the pod (if desired)
-                        .Where(s => s.Tier == batch.Key.Tier)
+                        .Where(s => s.Tier == batch.Key.Pod.Tier)
                         // Find the best station according to the chosen rule
                         .ArgMin(s =>
                         {
@@ -188,7 +188,7 @@ namespace RAWSimO.Core.Control.Defaults.ReplenishmentBatching
                                 case SamePodFirstStationRule.LeastBusy: return s.ItemBundles.Count();
                                 case SamePodFirstStationRule.MostBusy: return -s.ItemBundles.Count();
                                 case SamePodFirstStationRule.Random: return Instance.Randomizer.NextDouble();
-                                case SamePodFirstStationRule.DistanceEuclid: return Distances.CalculateEuclid(batch.Key, s, Instance.WrongTierPenaltyDistance);
+                                case SamePodFirstStationRule.DistanceEuclid: return Distances.CalculateEuclid(batch.Key.Pod, s, Instance.WrongTierPenaltyDistance);
                                 default: throw new ArgumentException("Unknown rule: " + _config.FirstStationRule);
                             }
                         });
@@ -199,9 +199,9 @@ namespace RAWSimO.Core.Control.Defaults.ReplenishmentBatching
                         foreach (var bundle in batch.Value)
                             AddToReadyList(bundle, chosenStation);
                         // Clean up
-                        _lastChosenStations[batch.Key] = chosenStation;
+                        _lastChosenStations[batch.Key.Pod] = chosenStation;
                         if (removedBatches == null)
-                            removedBatches = new List<Pod>();
+                            removedBatches = new List<Compartment>();
                         removedBatches.Add(batch.Key);
                     }
                     else
@@ -218,22 +218,22 @@ namespace RAWSimO.Core.Control.Defaults.ReplenishmentBatching
             }
         }
 
-        private void SignalItemStorageAllocationAvailable(Pod pod, ItemBundle bundle)
+        private void SignalItemStorageAllocationAvailable(Compartment compartment, ItemBundle bundle)
         {
             // This is another event this controller should react upon
             SituationInvestigated = false;
             // Add the bundle to the todo list
             _itemBundles.Add(bundle);
             // Save the pod where the bundle is assigned to
-            _bundleToPod[bundle] = pod;
+            _bundleToPod[bundle] = compartment;
             // Store the time the batch was first seen
-            if (!_podBundles.ContainsKey(pod) || !_podBundles[pod].Any())
-                _waitingTime[pod] = Instance.Controller.CurrentTime;
+            if (!_podBundles.ContainsKey(compartment) || !_podBundles[compartment].Any())
+                _waitingTime[compartment] = Instance.Controller.CurrentTime;
             // Assign the bundle to the batch or create a new one
-            if (_podBundles.ContainsKey(pod))
-                _podBundles[pod].Add(bundle);
+            if (_podBundles.ContainsKey(compartment))
+                _podBundles[compartment].Add(bundle);
             else
-                _podBundles[pod] = new List<ItemBundle>() { bundle };
+                _podBundles[compartment] = new List<ItemBundle>() { bundle };
         }
 
         #region IOptimize Members

@@ -395,9 +395,9 @@ namespace RAWSimO.Core
         /// <returns>The number of bots currently assigned to the station or always 0 if the bot manager does not support these assignments.</returns>
         internal int StatGetInfoBalancedBotsPerStation(InputStation station)
         {
-            return
+            return 
                 Controller.BotManager is BalancedBotManager ? (Controller.BotManager as BalancedBotManager).GetAssignedBotCount(station) :
-                Controller.BotManager is ConstantRatioBotManager ? (Controller.BotManager as ConstantRatioBotManager).GetAssignedBotCount(station) :
+                //Controller.BotManager is ConstantRatioBotManager ? (Controller.BotManager as ConstantRatioBotManager).GetAssignedBotCount(station) :
                 0;
         }
         /// <summary>
@@ -409,7 +409,7 @@ namespace RAWSimO.Core
         {
             return
                 Controller.BotManager is BalancedBotManager ? (Controller.BotManager as BalancedBotManager).GetAssignedBotCount(station) :
-                Controller.BotManager is ConstantRatioBotManager ? (Controller.BotManager as ConstantRatioBotManager).GetAssignedBotCount(station) :
+                //Controller.BotManager is ConstantRatioBotManager ? (Controller.BotManager as ConstantRatioBotManager).GetAssignedBotCount(station) :
                 0;
         }
 

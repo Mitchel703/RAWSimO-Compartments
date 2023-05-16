@@ -40,8 +40,8 @@ namespace RAWSimO.Core.Management
             }
             foreach (var iStation in instance.InputStations)
                 _availableStoreRequestsPerStation[iStation] = new HashSet<InsertRequest>();
-            foreach (var pod in instance.Pods)
-                _availableStoreRequestsPerPod[pod] = new HashSet<InsertRequest>();
+            foreach (var c in instance.Pods.SelectMany(x=>x.Compartments))
+                _availableStoreRequestsPerPod[c] = new HashSet<InsertRequest>();
             // Register for new order event to keep track of requests for all placed orders
             instance.OrderCompleted += OrderCompleted;
         }
@@ -263,7 +263,7 @@ namespace RAWSimO.Core.Management
         /// <summary>
         /// All requests to store a bundle per pod they are allocated to.
         /// </summary>
-        private Dictionary<Pod, HashSet<InsertRequest>> _availableStoreRequestsPerPod = new Dictionary<Pod, HashSet<InsertRequest>>();
+        private Dictionary<Compartment, HashSet<InsertRequest>> _availableStoreRequestsPerPod = new Dictionary<Compartment, HashSet<InsertRequest>>();
 
         /// <summary>
         /// All available requests for storing an item bundle.
@@ -282,8 +282,8 @@ namespace RAWSimO.Core.Management
                 _availableStoreRequestsPerStation[request.Station].Remove(request);
                 request.Station.StatCurrentlyOpenRequests = _availableStoreRequestsPerStation[request.Station].Count;
             }
-            if (request.Pod != null)
-                _availableStoreRequestsPerPod[request.Pod].Remove(request);
+            if (request.Compartment != null)
+                _availableStoreRequestsPerPod[request.Compartment].Remove(request);
         }
 
         /// <summary>
@@ -299,8 +299,8 @@ namespace RAWSimO.Core.Management
                 _availableStoreRequestsPerStation[request.Station].Add(request);
                 request.Station.StatCurrentlyOpenRequests = _availableStoreRequestsPerStation[request.Station].Count;
             }
-            if (request.Pod != null)
-                _availableStoreRequestsPerPod[request.Pod].Add(request);
+            if (request.Compartment != null)
+                _availableStoreRequestsPerPod[request.Compartment].Add(request);
         }
 
         /// <summary>
@@ -308,18 +308,18 @@ namespace RAWSimO.Core.Management
         /// </summary>
         /// <param name="item">The assigned item.</param>
         /// <param name="inputStation">The InputStation the item is assigned to.</param>
-        /// <param name="pod">The pod to store this item in.</param>
-        public void NewItemBundleAssignedToStation(ItemBundle item, InputStation inputStation, Pod pod)
+        /// <param name="compartment">The pod to store this item in.</param>
+        public void NewItemBundleAssignedToStation(ItemBundle item, InputStation inputStation, Compartment compartment)
         {
-            InsertRequest request = new InsertRequest(item, inputStation, pod);
+            InsertRequest request = new InsertRequest(item, inputStation, compartment);
             _availableStoreRequests.Add(request);
             if (request.Station != null)
             {
                 _availableStoreRequestsPerStation[request.Station].Add(request);
                 request.Station.StatCurrentlyOpenRequests = _availableStoreRequestsPerStation[request.Station].Count;
             }
-            if (request.Pod != null)
-                _availableStoreRequestsPerPod[request.Pod].Add(request);
+            if (request.Compartment != null)
+                _availableStoreRequestsPerPod[request.Compartment].Add(request);
         }
 
         /// <summary>
@@ -332,9 +332,9 @@ namespace RAWSimO.Core.Management
         /// <summary>
         /// Returns all requests belonging to the specified pod.
         /// </summary>
-        /// <param name="pod">The pod which requests are desired.</param>
+        /// <param name="compartment">The pod which requests are desired.</param>
         /// <returns>The requests of the given pod.</returns>
-        public IEnumerable<InsertRequest> GetStoreRequestsOfPod(Pod pod) { return _availableStoreRequestsPerPod[pod]; }
+        public IEnumerable<InsertRequest> GetStoreRequestsOfPod(Compartment compartment) { return _availableStoreRequestsPerPod[compartment]; }
 
         #endregion
 
@@ -714,8 +714,8 @@ namespace RAWSimO.Core.Management
         /// </summary>
         /// <param name="bundle">The bundle.</param>
         /// <param name="station">The station.</param>
-        /// <param name="pod">The pod.</param>
-        public InsertRequest(ItemBundle bundle, InputStation station, Pod pod) { Bundle = bundle; Station = station; Pod = pod; State = RequestState.Unfinished; }
+        /// <param name="compartment">The pod.</param>
+        public InsertRequest(ItemBundle bundle, InputStation station, Compartment compartment) { Bundle = bundle; Station = station; Compartment = compartment; State = RequestState.Unfinished; }
         /// <summary>
         /// The state of the request.
         /// </summary>
@@ -743,7 +743,7 @@ namespace RAWSimO.Core.Management
         /// <summary>
         /// The pod to store the bundle in.
         /// </summary>
-        public Pod Pod { get; private set; }
+        public Compartment Compartment { get; private set; }
         /// <summary>
         /// Used to indicate whether the request was used to build a new task or injected to an existing task.
         /// </summary>
