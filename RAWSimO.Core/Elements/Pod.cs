@@ -26,7 +26,10 @@ namespace RAWSimO.Core.Elements
         /// Creates a new pod.
         /// </summary>
         /// <param name="instance">The instance this pod belongs to.</param>
-        internal Pod(Instance instance) : base(instance) { }
+        internal Pod(Instance instance) : base(instance)
+        {
+            this.instance = instance;
+        }
 
         #endregion
 
@@ -41,6 +44,7 @@ namespace RAWSimO.Core.Elements
         /// The maximal number of SKUs that will be stored using fast access implementations.
         /// </summary>
         internal const int MAX_ITEMDESCRIPTION_COUNT_FOR_FAST_ACCESS = 1000;
+        private readonly Instance instance;
 
         ///// <summary>
         ///// The capacity of this pod.
@@ -119,28 +123,13 @@ namespace RAWSimO.Core.Elements
         /// <param name="bundle">The bundle for which capacity shall be reserved.</param>
         internal void RegisterBundle(ItemBundle bundle)
         {
-            var registered = false;
-            //TODO: radomize?
-            foreach (var chosenCompartment in Compartments)
-            {
-                try
-                {
-                    chosenCompartment.RegisterBundle(bundle);
-                    // Notify the instance about the reservation
-                    Instance.NotifyBundleRegistered(this, bundle);
-                    registered = true;
-                    break;
-                }
-                catch
-                {
-                    continue;
-                }
-            }
+            var chosenCompartment = this.CompartmentFitsForReservation(bundle)
+                             .OrderBy(p => instance.Randomizer.NextDouble())
+                             .First();
 
-            if (!registered)
-            {
-                throw new InvalidOperationException("Cannot reserve more capacity than this pod has (in any compartment)!");
-            }
+            chosenCompartment.RegisterBundle(bundle);
+            // Notify the instance about the reservation
+            Instance.NotifyBundleRegistered(this, bundle);
         }
 
         /// <summary>
