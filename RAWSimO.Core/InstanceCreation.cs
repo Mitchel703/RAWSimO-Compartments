@@ -343,7 +343,7 @@ namespace RAWSimO.Core
             Pod pod = new Pod(this) { ID = id, Tier = tier, Radius = radius, X = x, Y = y, Orientation = orientation, Compartments = new() };
             foreach (var c in capacity)
             {
-                pod.Compartments.Add(new Compartment("any name", c.Capacity, pod));
+                pod.Compartments.Add(new Compartment(this, "any name", c.Capacity, pod));
             }
             Pods.Add(pod);
             tier.AddPod(pod);
@@ -374,7 +374,7 @@ namespace RAWSimO.Core
             Pod pod = new Pod(this) { ID = id, Tier = tier, Radius = radius, X = waypoint.X, Y = waypoint.Y, Orientation = orientation, Compartments = new(), Waypoint = waypoint };
             foreach (var c in capacity)
             {
-                pod.Compartments.Add(new Compartment("any name", c.Capacity, pod));
+                pod.Compartments.Add(new Compartment(this, "any name", c.Capacity, pod));
             }
             Pods.Add(pod);
             tier.AddPod(pod);

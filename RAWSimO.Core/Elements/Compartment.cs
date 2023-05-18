@@ -1,5 +1,7 @@
-﻿using RAWSimO.Core.Items;
+﻿using RAWSimO.Core.Info;
+using RAWSimO.Core.Items;
 using RAWSimO.Core.Management;
+using RAWSimO.Toolbox;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,11 +10,48 @@ namespace RAWSimO.Core.Elements
 {
     public class Compartment
     {
-        public Compartment(string name, double capacity, Pod pod)
+        internal const int MAX_ITEMDESCRIPTION_COUNT_FOR_FAST_ACCESS = 1000;
+
+        /// <summary>
+        /// All items that are physically contained in this pod.
+        /// </summary>
+        internal HashSet<ItemDescription> _itemDescriptionsContained = new HashSet<ItemDescription>();
+        /// <summary>
+        /// All items that are physically contained in this pod.
+        /// </summary>
+        internal IEnumerable<ItemDescription> ItemDescriptionsContained { get { return _itemDescriptionsContained; } }
+        /// <summary>
+        /// Contains the number of items still left of the different kinds (including already reserved ones).
+        /// </summary>
+        private IInflexibleDictionary<ItemDescription, int> _itemDescriptionCountContained;
+        /// <summary>
+        /// Contains the number of items still left of the different kinds (exluding already reserved ones).
+        /// </summary>
+        private IInflexibleDictionary<ItemDescription, int> _itemDescriptionCountAvailable;
+
+
+        public Compartment(Instance instance, string name, double capacity, Pod pod)
         {
+            this.Instance = instance;
             Name = name;
             Capacity = capacity;
             Pod = pod;
+        }
+
+        internal void InitCompartmentContentInfo()
+        {
+            if (Instance.ItemDescriptions.Count <= MAX_ITEMDESCRIPTION_COUNT_FOR_FAST_ACCESS)
+            {
+                // Use fast access dictionaries
+                _itemDescriptionCountContained = new VolatileIDDictionary<ItemDescription, int>(Instance.ItemDescriptions.Select(i => new VolatileKeyValuePair<ItemDescription, int>(i, 0)).ToList());
+                _itemDescriptionCountAvailable = new VolatileIDDictionary<ItemDescription, int>(Instance.ItemDescriptions.Select(i => new VolatileKeyValuePair<ItemDescription, int>(i, 0)).ToList());
+            }
+            else
+            {
+                // Use ordinary dictionaries
+                _itemDescriptionCountContained = new InflexibleIntDictionary<ItemDescription>(Instance.ItemDescriptions.Select(i => new KeyValuePair<ItemDescription, int>(i, 0)).ToList());
+                _itemDescriptionCountAvailable = new InflexibleIntDictionary<ItemDescription>(Instance.ItemDescriptions.Select(i => new KeyValuePair<ItemDescription, int>(i, 0)).ToList());
+            }
         }
 
         /// <summary>
@@ -26,6 +65,7 @@ namespace RAWSimO.Core.Elements
 
         public Pod Pod { get; }
 
+        private readonly Instance Instance;
         internal string Name;
 
         /// <summary>
@@ -57,14 +97,62 @@ namespace RAWSimO.Core.Elements
 
         public bool Add(ItemBundle itemBundle, InsertRequest insertRequest = null)
         {
-                // Keep track of weight
-                CapacityInUse += itemBundle.BundleWeight;
-                // Keep track of reserved space
-                _registeredBundles.Remove(itemBundle);
-                CapacityReserved = _registeredBundles.Sum(b => b.BundleWeight);
+            // Init, if not done yet
+            if (_itemDescriptionCountContained == null)
+                InitCompartmentContentInfo();
+
+            // Keep track of weight
+            CapacityInUse += itemBundle.BundleWeight;
+            // Keep track of reserved space
+            _registeredBundles.Remove(itemBundle);
+            CapacityReserved = _registeredBundles.Sum(b => b.BundleWeight);
+
             // Keep track of items actually contained in this pod
+            if (_itemDescriptionCountContained[itemBundle.ItemDescription] <= 0)
+                _itemDescriptionsContained.Add(itemBundle.ItemDescription);
+            // Keep track of the number of available items on this pod (for picking)
+            _itemDescriptionCountAvailable[itemBundle.ItemDescription] += itemBundle.ItemCount;
+            // Keep track of the number of contained items on this pod (for picking)
+            _itemDescriptionCountContained[itemBundle.ItemDescription] += itemBundle.ItemCount;
+
             return true;
         }
+
+        public void Remove(ItemDescription item, ExtractRequest extractRequest)
+        {
+            // Remove the item entity
+            _itemDescriptionCountContained[item]--;
+            // Keep track of items actually contained in this pod
+            if (_itemDescriptionCountContained[item] <= 0)
+                _itemDescriptionsContained.Remove(item);
+            // Keep track of weight
+            CapacityInUse -= item.Weight;
+        }
+
+        internal void RegisterItem(ItemDescription item, ExtractRequest extractRequest)
+        {
+            // Init, if not done yet
+            if (_itemDescriptionCountContained == null)
+                InitCompartmentContentInfo();
+            if (_itemDescriptionCountAvailable[item] <= 0)
+                throw new InvalidOperationException("Cannot reserve an item for picking, if there is none left of the kind!");
+            _itemDescriptionCountAvailable[item]--;
+        }
+
+        internal void UnregisterItem(ItemDescription item, ExtractRequest extractRequest)
+        {
+            _itemDescriptionCountAvailable[item]++;
+        }
+
+        public bool IsContained(ItemDescription itemDescription) { return _itemDescriptionCountContained == null ? false : _itemDescriptionCountContained[itemDescription] > 0; }
+
+        public bool IsAvailable(ItemDescription itemDescription) { return _itemDescriptionCountAvailable == null ? false : _itemDescriptionCountAvailable[itemDescription] > 0; }
+
+        public int CountContained(ItemDescription itemDescription) { return _itemDescriptionCountContained == null ? 0 : _itemDescriptionCountContained[itemDescription]; }
+
+        public int CountAvailable(ItemDescription itemDescription) { return _itemDescriptionCountAvailable == null ? 0 : _itemDescriptionCountAvailable[itemDescription]; }
+
+        public int GetInfoContent(IItemDescriptionInfo item) { return _itemDescriptionCountContained != null ? _itemDescriptionCountContained[item as ItemDescription] : 0; }
 
         public bool FitsForReservation(ItemBundle bundle)
         {
