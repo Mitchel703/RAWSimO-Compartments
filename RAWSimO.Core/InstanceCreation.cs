@@ -244,8 +244,8 @@ namespace RAWSimO.Core
             switch (ControllerConfig.PathPlanningConfig.GetMethodType())
             {
                 case PathPlanningMethodType.Simple:
-                    bot = new BotHazard(this, ControllerConfig.PathPlanningConfig as SimplePathPlanningConfiguration);
-                    break;
+                    //bot = new BotHazard(this, ControllerConfig.PathPlanningConfig as SimplePathPlanningConfiguration);
+                    //break;
                 case PathPlanningMethodType.Dummy:
                 case PathPlanningMethodType.WHCAvStar:
                 case PathPlanningMethodType.WHCAnStar:
@@ -272,11 +272,11 @@ namespace RAWSimO.Core
             bot.TurnSpeed = turnSpeed;
             bot.CollisionPenaltyTime = collisionPenaltyTime;
             bot.Orientation = orientation;
-            if (bot is BotHazard)
-            {
-                ((BotHazard)bot).EvadeDistance = 2.3 * radius;
-                ((BotHazard)bot).SetTargetOrientation(orientation);
-            }
+            //if (bot is BotHazard)
+            //{
+            //    ((BotHazard)bot).EvadeDistance = 2.3 * radius;
+            //    ((BotHazard)bot).SetTargetOrientation(orientation);
+            //}
             // Add bot
             Bots.Add(bot);
             tier.AddBot(bot);

@@ -45,13 +45,6 @@ namespace RAWSimO.Core.Control.Defaults.ItemStorage
                  .First();
         }
 
-        public Compartment SelectPodForInititalInventory(Instance instance, ItemBundle bundle, Pod pod)
-        {
-            return pod.CompartmentFitsForReservation(bundle)
-                 .OrderBy(p => instance.Randomizer.NextDouble())
-                 .First();
-        }
-
         /// <summary>
         /// The config of this controller.
         /// </summary>
