@@ -70,5 +70,10 @@ namespace RAWSimO.Core.Elements
         {
             return CapacityInUse + CapacityReserved + bundle.BundleWeight <= Capacity;
         }
+
+        public bool Fits(ItemBundle bundle)
+        {
+            return CapacityInUse + bundle.BundleWeight <= Capacity;
+        }
     }
 }

@@ -191,9 +191,9 @@ namespace RAWSimO.Core.Elements
                 {
                     // Transfer bundle, wait until transfer is complete, remove request
                     //TODO: here we add bundle to pod and in Add method always first compartment is used
-                    //Compartment compartment = ((Control.Defaults.ItemStorage.RandomStorageManager)Instance.Controller.StorageManager)
-                    //    .SelectPodForInititalInventory(Instance, bundle, pod);
-                    var compartment = bot.Pod.Compartments.First();
+                    var compartment = bot.Pod.CompartmentFits(bundle)
+                        .OrderBy(p => Instance.Randomizer.NextDouble())
+                        .FirstOrDefault();
 
                     pod.Add(compartment, bundle, request);
                     if (Instance.SettingConfig.VisualizationAttached)

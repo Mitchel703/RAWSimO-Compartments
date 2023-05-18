@@ -264,8 +264,7 @@ namespace RAWSimO.Core.Elements
         /// <returns><code>true</code> if the items fit this pod, <code>false</code> otherwise.</returns>
         public bool Fits(ItemBundle bundle)
         {
-            var compartment = Compartments.First();
-            return compartment.CapacityInUse + bundle.BundleWeight <= compartment.Capacity;
+            return Compartments.Any(c => c.Fits(bundle));
         }
 
         /// <summary>
@@ -273,18 +272,15 @@ namespace RAWSimO.Core.Elements
         /// </summary>
         /// <param name="bundle">The bundle that has to be checked.</param>
         /// <returns><code>true</code> if the bundle fits, <code>false</code> otherwise.</returns>
-        public bool FitsForReservation(ItemBundle bundle)
+        public List<Compartment> CompartmentFits(ItemBundle bundle)
         {
-            var compartment = Compartments.First();
-
-            return compartment.CapacityInUse + compartment.CapacityReserved + bundle.BundleWeight <= compartment.Capacity;
+            return Compartments.Where(c => c.Fits(bundle)).ToList();
         }
 
         public List<Compartment> CompartmentFitsForReservation(ItemBundle bundle)
         {
-
             return this.Compartments
-                .Where(compartment => compartment.CapacityInUse + compartment.CapacityReserved + bundle.BundleWeight <= compartment.Capacity)
+                .Where(compartment => compartment.FitsForReservation(bundle))
                 .ToList();
         }
 
