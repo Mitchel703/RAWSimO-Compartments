@@ -392,10 +392,10 @@ namespace RAWSimO.Core.Control.Shared
             _itemDescriptionsOrdered = Instance.ItemDescriptions.OrderByDescending(i => i.OrderCount).ToList();
 
             // Determine the shares of the capacity of the storage pod classes
-            double overallCapacity = _classStoragePods.Sum(l => l.Sum(p => p.Compartments.First().Capacity));
+            double overallCapacity = _classStoragePods.Sum(l => l.Sum(p => p.Compartments.Sum(c => c.Capacity)));
             Dictionary<int, double> classStorageCapacityShares = new Dictionary<int, double>();
             for (int i = 0; i < _classCount; i++)
-                classStorageCapacityShares[i] = _classStoragePods[i].Sum(p => p.Compartments.First().Capacity) / overallCapacity;
+                classStorageCapacityShares[i] = _classStoragePods[i].Sum(p => p.Compartments.Sum(c => c.Capacity)) / overallCapacity;
 
             // Get weighted item demand
             double overallDemand = _itemDescriptionsOrdered.Sum(i => i.OrderCount);

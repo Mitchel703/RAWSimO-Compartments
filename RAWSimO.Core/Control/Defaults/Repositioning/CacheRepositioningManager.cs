@@ -131,11 +131,11 @@ namespace RAWSimO.Core.Control.Defaults.Repositioning
                         return potentialPicks;
                     },
                     // Then try to use an empty pod
-                    () => { return _currentPod.Compartments.First().CapacityInUse; },
+                    () => { return _currentPod.Compartments.Sum(c => c.CapacityInUse); },
                     // Then try to get a destination location most near to the input-stations (if pod is considered empty) or the shortest move distance (if pod still has sufficient content)
                     () =>
                     {
-                        return (_currentPod.Compartments.First().CapacityInUse / _currentPod.Compartments.First().Capacity < _config.PodEmptyThreshold) ?
+                        return (_currentPod.Compartments.Sum(c => c.CapacityInUse) / _currentPod.Compartments.Sum(c => c.Capacity) < _config.PodEmptyThreshold) ?
                             _currentStorageLocation.ShortestPodPathDistanceToNextInputStation :
                             Distances.CalculateShortestPathPodSafe(_currentPod.Waypoint, _currentStorageLocation, Instance);
                     },
@@ -169,7 +169,7 @@ namespace RAWSimO.Core.Control.Defaults.Repositioning
                         return -potentialPicks;
                     },
                     // Then try to use a full pod
-                    () => { return -_currentPod.Compartments.First().CapacityInUse; },
+                    () => { return -_currentPod.Compartments.Sum(c => c.CapacityInUse); },
                     // Then try to do a short move
                     () => { return Distances.CalculateShortestPathPodSafe(_currentPod.Waypoint, _currentStorageLocation, Instance); });
             }

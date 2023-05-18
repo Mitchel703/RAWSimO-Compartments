@@ -69,7 +69,7 @@ namespace RAWSimO.Core.Elements
         ///// <summary>
         /// All items that are physically contained in this pod.
         /// </summary>
-        internal IEnumerable<ItemDescription> ItemDescriptionsContained { get { return Compartments.SelectMany(x=>x._itemDescriptionsContained); } }
+        internal IEnumerable<ItemDescription> ItemDescriptionsContained { get { return Compartments.SelectMany(x => x._itemDescriptionsContained); } }
         /// <summary>
         /// All extract requests that shall be completed with this pod.
         /// </summary>
@@ -118,7 +118,7 @@ namespace RAWSimO.Core.Elements
 
             _extractRequestsRegistered.Add(extractRequest);
             extractRequest.Assign(this);
-            
+
             if (!registrations.ContainsKey(item))
             {
                 registrations.Add(item, new Queue<Compartment>());
@@ -188,7 +188,7 @@ namespace RAWSimO.Core.Elements
             var availableCompartments = Compartments.Where(x => x.IsContained(item));
             var choosenCompartment = availableCompartments
                 .OrderBy(p => instance.Randomizer.NextDouble())
-                .First(); 
+                .First();
             choosenCompartment.Remove(item, extractRequest);
             // Signal change
             _changed = true;
@@ -212,21 +212,21 @@ namespace RAWSimO.Core.Elements
         /// </summary>
         /// <param name="itemDescription">The description to check.</param>
         /// <returns><code>true</code> if such an item is available, <code>false</code> otherwise.</returns>
-        public bool IsAvailable(ItemDescription itemDescription) { return Compartments.Any(x=>x.IsAvailable(itemDescription)); }
+        public bool IsAvailable(ItemDescription itemDescription) { return Compartments.Any(x => x.IsAvailable(itemDescription)); }
 
         /// <summary>
         /// Returns how many items of the specified type are contained in this pod.
         /// </summary>
         /// <param name="itemDescription">The item to check for.</param>
         /// <returns>The count of items of the specified type that are contained in this pod.</returns>
-        public int CountContained(ItemDescription itemDescription) { return Compartments.Sum(x=>x.CountContained(itemDescription)); }
+        public int CountContained(ItemDescription itemDescription) { return Compartments.Sum(x => x.CountContained(itemDescription)); }
 
         /// <summary>
         /// Returns how many items of the specified type are still available in this pod (not already reserved for picking).
         /// </summary>
         /// <param name="itemDescription">The item to check for.</param>
         /// <returns>The count of items of the specified type that are still available in this pod.</returns>
-        public int CountAvailable(ItemDescription itemDescription) { return Compartments.Sum(x=>x.CountAvailable(itemDescription)); }
+        public int CountAvailable(ItemDescription itemDescription) { return Compartments.Sum(x => x.CountAvailable(itemDescription)); }
 
         /// <summary>
         /// Checks whether the specified bundle of items fits into this pod.
@@ -293,11 +293,16 @@ namespace RAWSimO.Core.Elements
         /// <returns>A simple string.</returns>
         public override string ToString()
         {
-            var c = Compartments.First();
-            return
-                "Pod" + ID + "(" +
-                (c.CapacityInUse / c.Capacity).ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "%" +
-                ((c.CapacityInUse + c.CapacityReserved) / c.Capacity).ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "%)";
+            var msg = "Pod" + ID + "[";
+            foreach (var c in Compartments)
+            {
+                msg += "(";
+                msg += (c.CapacityInUse / c.Capacity).ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "%";
+                msg += ((c.CapacityInUse + c.CapacityReserved) / c.Capacity).ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "%";
+                msg += ")";
+            }
+            msg += "]";
+            return msg;
         }
 
         #endregion
@@ -356,7 +361,6 @@ namespace RAWSimO.Core.Elements
         /// <returns>The heat of this pod.</returns>
         public double GetInfoHeatValue()
         {
-            var c = Compartments.First();
             switch (Instance.SettingConfig.HeatMode)
             {
                 case HeatMode.NumItemsHandled:
@@ -364,80 +368,80 @@ namespace RAWSimO.Core.Elements
                 case HeatMode.NumBundlesHandled:
                     return Instance.StatMaxBundlesHandledByPod > 0 ? (double)StatBundlesHandled / (double)Instance.StatMaxBundlesHandledByPod : 0;
                 case HeatMode.CurrentCapacityUtilization:
-                    return c.CapacityInUse / c.Capacity;
+                    return Compartments.Sum(c => c.CapacityInUse) / Compartments.Sum(c => c.Capacity);
                 case HeatMode.AverageFrequency:
-                    //{
-                    //    if (_itemDescriptionCountContained == null || !Instance.ItemDescriptions.Any(item => _itemDescriptionCountContained[item] > 0))
-                    //        return 0;
-                    //    else
-                    //    {
-                    //        int contained = 0; double value = 0;
-                    //        foreach (var item in Instance.ItemDescriptions)
-                    //        {
-                    //            if (_itemDescriptionCountContained[item] > 0)
-                    //            {
-                    //                contained++;
-                    //                value += Instance.FrequencyTracker.GetMeasuredFrequency(item);
-                    //            }
-                    //        }
-                    //        return contained > 0 ? value / contained : 0;
-                    //    }
+                //{
+                //    if (_itemDescriptionCountContained == null || !Instance.ItemDescriptions.Any(item => _itemDescriptionCountContained[item] > 0))
+                //        return 0;
+                //    else
+                //    {
+                //        int contained = 0; double value = 0;
+                //        foreach (var item in Instance.ItemDescriptions)
+                //        {
+                //            if (_itemDescriptionCountContained[item] > 0)
+                //            {
+                //                contained++;
+                //                value += Instance.FrequencyTracker.GetMeasuredFrequency(item);
+                //            }
+                //        }
+                //        return contained > 0 ? value / contained : 0;
+                //    }
 
-                    //}
+                //}
                 case HeatMode.MaxFrequency:
-                    //{
-                    //    if (_itemDescriptionCountContained == null || !Instance.ItemDescriptions.Any(item => _itemDescriptionCountContained[item] > 0))
-                    //        return 0;
-                    //    else
-                    //    {
-                    //        int contained = 0; double value = 0;
-                    //        foreach (var item in Instance.ItemDescriptions)
-                    //        {
-                    //            if (_itemDescriptionCountContained[item] > 0)
-                    //            {
-                    //                contained++;
-                    //                value = Math.Max(value, Instance.FrequencyTracker.GetMeasuredFrequency(item));
-                    //            }
-                    //        }
-                    //        return value;
-                    //    }
-                    //}
+                //{
+                //    if (_itemDescriptionCountContained == null || !Instance.ItemDescriptions.Any(item => _itemDescriptionCountContained[item] > 0))
+                //        return 0;
+                //    else
+                //    {
+                //        int contained = 0; double value = 0;
+                //        foreach (var item in Instance.ItemDescriptions)
+                //        {
+                //            if (_itemDescriptionCountContained[item] > 0)
+                //            {
+                //                contained++;
+                //                value = Math.Max(value, Instance.FrequencyTracker.GetMeasuredFrequency(item));
+                //            }
+                //        }
+                //        return value;
+                //    }
+                //}
                 case HeatMode.AverageStaticFrequency:
-                    //{
-                    //    if (_itemDescriptionCountContained == null || !Instance.ItemDescriptions.Any(item => _itemDescriptionCountContained[item] > 0))
-                    //        return 0;
-                    //    else
-                    //    {
-                    //        int contained = 0; double value = 0;
-                    //        foreach (var item in Instance.ItemDescriptions)
-                    //        {
-                    //            if (_itemDescriptionCountContained[item] > 0)
-                    //            {
-                    //                contained++;
-                    //                value += Instance.FrequencyTracker.GetStaticFrequency(item);
-                    //            }
-                    //        }
-                    //        return contained > 0 ? value / contained : 0;
-                    //    }
-                    //}
+                //{
+                //    if (_itemDescriptionCountContained == null || !Instance.ItemDescriptions.Any(item => _itemDescriptionCountContained[item] > 0))
+                //        return 0;
+                //    else
+                //    {
+                //        int contained = 0; double value = 0;
+                //        foreach (var item in Instance.ItemDescriptions)
+                //        {
+                //            if (_itemDescriptionCountContained[item] > 0)
+                //            {
+                //                contained++;
+                //                value += Instance.FrequencyTracker.GetStaticFrequency(item);
+                //            }
+                //        }
+                //        return contained > 0 ? value / contained : 0;
+                //    }
+                //}
                 case HeatMode.MaxStaticFrequency:
-                    //{
-                    //    if (_itemDescriptionCountContained == null || !Instance.ItemDescriptions.Any(item => _itemDescriptionCountContained[item] > 0))
-                    //        return 0;
-                    //    else
-                    //    {
-                    //        int contained = 0; double value = 0;
-                    //        foreach (var item in Instance.ItemDescriptions)
-                    //        {
-                    //            if (_itemDescriptionCountContained[item] > 0)
-                    //            {
-                    //                contained++;
-                    //                value = Math.Max(value, Instance.FrequencyTracker.GetStaticFrequency(item));
-                    //            }
-                    //        }
-                    //        return value;
-                    //    }
-                    //}
+                //{
+                //    if (_itemDescriptionCountContained == null || !Instance.ItemDescriptions.Any(item => _itemDescriptionCountContained[item] > 0))
+                //        return 0;
+                //    else
+                //    {
+                //        int contained = 0; double value = 0;
+                //        foreach (var item in Instance.ItemDescriptions)
+                //        {
+                //            if (_itemDescriptionCountContained[item] > 0)
+                //            {
+                //                contained++;
+                //                value = Math.Max(value, Instance.FrequencyTracker.GetStaticFrequency(item));
+                //            }
+                //        }
+                //        return value;
+                //    }
+                //}
                 case HeatMode.StorageType:
                     return InfoTagPodStorageType;
                 case HeatMode.CacheType:
@@ -510,7 +514,7 @@ namespace RAWSimO.Core.Elements
         /// Gets information about number of items of the given kind in this pod.
         /// </summary>
         /// <returns>The number of units contained in the pod of the specified item.</returns>
-        public int GetInfoContent(IItemDescriptionInfo item) { _contentChanged = false; return Compartments.Sum(x=>x.GetInfoContent(item)); }
+        public int GetInfoContent(IItemDescriptionInfo item) { _contentChanged = false; return Compartments.Sum(x => x.GetInfoContent(item)); }
         /// <summary>
         /// Indicates whether the content of the pod changed.
         /// </summary>
