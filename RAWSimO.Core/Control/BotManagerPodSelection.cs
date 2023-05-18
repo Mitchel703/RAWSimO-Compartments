@@ -505,7 +505,7 @@ namespace RAWSimO.Core.Control
         /// <returns>A score that can be used to decide about the best assignment. Minimization / Smaller is better.</returns>
         public double Score(PCScorerPodForIStationBotDemand config, Bot bot, Pod pod, InputStation station)
         {
-            return -pod.Compartments.First().RegisteredBundles.Sum(b =>
+            return -pod.Compartments.SelectMany(c => c.RegisteredBundles).Sum(b =>
                 Math.Min(
                     // Overall demand
                     Instance.ResourceManager.GetDemandAssigned(b.ItemDescription) + Instance.ResourceManager.GetDemandQueued(b.ItemDescription) + Instance.ResourceManager.GetDemandBacklog(b.ItemDescription),
@@ -581,9 +581,10 @@ namespace RAWSimO.Core.Control
         {
             return config.Binary ?
                 // Use the threshold to determine the pod score
-                (config.PreferFullest ? (pod.Compartments.First().CapacityInUse / pod.Compartments.First().Capacity > config.Threshold ? 0 : 1) : (pod.Compartments.First().CapacityInUse / pod.Compartments.First().Capacity < config.Threshold ? 0 : 1)) :
+                (config.PreferFullest ? (pod.Compartments.Sum(c=> c.CapacityInUse) / pod.Compartments.Sum(c=>c.Capacity) > config.Threshold ? 0 : 1) 
+                : (pod.Compartments.Sum(c => c.CapacityInUse) / pod.Compartments.Sum(c => c.Capacity) < config.Threshold ? 0 : 1)) :
                 // Use the absolute capacity used to determine the pod score
-                (config.PreferFullest ? -pod.Compartments.First().CapacityInUse : pod.Compartments.First().CapacityInUse);
+                (config.PreferFullest ? -pod.Compartments.Sum(c => c.CapacityInUse) : pod.Compartments.Sum(c => c.CapacityInUse));
         }
         /// <summary>
         /// Determines a score that can be used to decide about an assignment.
