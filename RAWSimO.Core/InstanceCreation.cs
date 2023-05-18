@@ -8,6 +8,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using RAWSimO.Core.IO;
+using System.Security.Cryptography;
 
 namespace RAWSimO.Core
 {
@@ -341,9 +342,10 @@ namespace RAWSimO.Core
                 capacity = SettingConfig.OverrideConfig.OverridePodCapacityValue;
             // Create the pod
             Pod pod = new Pod(this) { ID = id, Tier = tier, Radius = radius, X = x, Y = y, Orientation = orientation, Compartments = new() };
+            var cId = 0;
             foreach (var c in capacity)
             {
-                pod.Compartments.Add(new Compartment(this, "any name", c.Capacity, pod));
+                pod.Compartments.Add(new Compartment(this, $"P{id}C{cId++}", c.Capacity, pod));
             }
             Pods.Add(pod);
             tier.AddPod(pod);
@@ -372,9 +374,10 @@ namespace RAWSimO.Core
                 capacity = SettingConfig.OverrideConfig.OverridePodCapacityValue;
             // Create the pod
             Pod pod = new Pod(this) { ID = id, Tier = tier, Radius = radius, X = waypoint.X, Y = waypoint.Y, Orientation = orientation, Compartments = new(), Waypoint = waypoint };
+            var cId = 0;
             foreach (var c in capacity)
             {
-                pod.Compartments.Add(new Compartment(this, "any name", c.Capacity, pod));
+                pod.Compartments.Add(new Compartment(this, $"P{id}C{cId++}", c.Capacity, pod));
             }
             Pods.Add(pod);
             tier.AddPod(pod);

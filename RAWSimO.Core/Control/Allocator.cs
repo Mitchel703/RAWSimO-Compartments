@@ -5,9 +5,11 @@ using RAWSimO.Core.Items;
 using RAWSimO.Core.Management;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace RAWSimO.Core.Control
 {
@@ -50,7 +52,10 @@ namespace RAWSimO.Core.Control
             if (station.CapacityInUse + bundle.BundleWeight > station.Capacity)
                 throw new InvalidOperationException("Allocating the bundle to the station would exceed its capacity!");
             if (Instance.ControllerConfig.ItemStorageConfig.GetMethodType() != ItemStorageMethodType.Dummy && compartment.CapacityInUse + bundle.BundleWeight > compartment.Capacity)
+            {
+                Debug.WriteLine($"Compartment overloaded. bundle {bundle.ID} weight {bundle.BundleWeight} in {compartment.Name}. {compartment.CapacityInUse}+{compartment.CapacityReserved}/{compartment.Capacity}.");
                 throw new InvalidOperationException("Allocating the bundle to the pod would exceed its capacity!");
+            }
             // Remove from ready lists
             _iStationAssignments.Remove(bundle);
             _podAssignments.Remove(bundle);

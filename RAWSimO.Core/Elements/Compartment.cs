@@ -4,6 +4,7 @@ using RAWSimO.Core.Management;
 using RAWSimO.Toolbox;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace RAWSimO.Core.Elements
@@ -91,6 +92,7 @@ namespace RAWSimO.Core.Elements
         {
             _registeredBundles.Add(bundle);
             CapacityReserved = _registeredBundles.Sum(b => b.BundleWeight);
+            Debug.WriteLine($"Registered bundle {bundle.ID} in {Name}. {CapacityInUse}+{CapacityReserved}/{Capacity}.");
             if (CapacityInUse + CapacityReserved > Capacity)
                 throw new InvalidOperationException("Cannot reserve more capacity than this pod has!");
         }
