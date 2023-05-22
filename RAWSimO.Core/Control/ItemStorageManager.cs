@@ -107,7 +107,7 @@ namespace RAWSimO.Core.Control
             // Remove the bundle from the list of pending ones (if it was immediately assigned this operation is actually redundant)
             _pendingBundles.Remove(bundle);
             // Also notify the pod about the new bundle
-            compartment.RegisterBundle(bundle);
+            compartment.Pod.RegisterBundle(bundle, compartment);
             // Notify the instance about the decision
             Instance.NotifyItemStorageDecided(compartment.Pod, bundle);
         }

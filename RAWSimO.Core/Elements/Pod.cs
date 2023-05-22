@@ -89,12 +89,8 @@ namespace RAWSimO.Core.Elements
         /// Reserves capacity of this pod for the given bundle. The reserved capacity will be maintained when the bundle is allocated.
         /// </summary>
         /// <param name="bundle">The bundle for which capacity shall be reserved.</param>
-        internal void RegisterBundle(ItemBundle bundle)
+        internal void RegisterBundle(ItemBundle bundle, Compartment chosenCompartment)
         {
-            var chosenCompartment = this.CompartmentFitsForReservation(bundle)
-                             .OrderBy(p => instance.Randomizer.NextDouble())
-                             .First();
-
             chosenCompartment.RegisterBundle(bundle);
             // Notify the instance about the reservation
             Instance.NotifyBundleRegistered(this, bundle);
