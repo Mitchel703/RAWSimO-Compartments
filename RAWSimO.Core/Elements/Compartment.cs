@@ -94,14 +94,14 @@ namespace RAWSimO.Core.Elements
             _registeredBundles.Add(bundle);
             CapacityReserved += bundle.BundleWeight;
             //CapacityReserved = _registeredBundles.Sum(b => b.BundleWeight);
-            Debug.WriteLine($"Registered bundle {bundle.ID} in {Name}. {CapacityInUse}+{CapacityReserved}/{Capacity}.");
+            //Debug.WriteLine($"Registered bundle {bundle.ID} in {Name}. {CapacityInUse}+{CapacityReserved}/{Capacity}.");
             if (CapacityInUse + CapacityReserved > Capacity)
                 throw new InvalidOperationException("Cannot reserve more capacity than this pod has!");
         }
 
         public bool Add(ItemBundle itemBundle, InsertRequest insertRequest = null)
         {
-            Debug.WriteLine($"CompartmentAdd-Before. Bundle {itemBundle.ID} weight {itemBundle.BundleWeight} in {this.Name}: InUse={this.CapacityInUse}/ Reserved={this.CapacityReserved}/ Total={this.Capacity}.");
+            //Debug.WriteLine($"CompartmentAdd-Before. Bundle {itemBundle.ID} weight {itemBundle.BundleWeight} in {this.Name}: InUse={this.CapacityInUse}/ Reserved={this.CapacityReserved}/ Total={this.Capacity}.");
             // Init, if not done yet
             if (_itemDescriptionCountContained == null)
                 InitCompartmentContentInfo();
@@ -123,7 +123,7 @@ namespace RAWSimO.Core.Elements
             // Keep track of the number of contained items on this pod (for picking)
             _itemDescriptionCountContained[itemBundle.ItemDescription] += itemBundle.ItemCount;
 
-            Debug.WriteLine($"CompartmentAdd-After. Bundle {itemBundle.ID} weight {itemBundle.BundleWeight} in {this.Name}: InUse={this.CapacityInUse}/ Reserved={this.CapacityReserved}/ Total={this.Capacity}.");
+            //Debug.WriteLine($"CompartmentAdd-After. Bundle {itemBundle.ID} weight {itemBundle.BundleWeight} in {this.Name}: InUse={this.CapacityInUse}/ Reserved={this.CapacityReserved}/ Total={this.Capacity}.");
             return true;
         }
 
