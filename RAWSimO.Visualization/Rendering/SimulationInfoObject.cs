@@ -2,6 +2,7 @@
 using RAWSimO.Core.IO;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -943,6 +944,7 @@ namespace RAWSimO.Visualization.Rendering
         private TextBlock _blockXY;
         private TextBlock _blockOrientation;
         private TextBlock _blockCapacity;
+        private List<TextBlock> _blockCompartmentCapacity = new List<TextBlock>();
         private TextBlock _blockCapacityReserved;
         private TextBlock _blockStorageTag;
         private TreeViewItem _treeItemContent;
@@ -955,6 +957,7 @@ namespace RAWSimO.Visualization.Rendering
 
         public override void InfoPanelUpdate()
         {
+            var originalText = _blockCapacity.Text.Clone();
             // Update meta info
             _blockXY.Text = _pod.GetInfoCenterX().ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "/" + _pod.GetInfoCenterY().ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER);
             _blockOrientation.Text = Transformation2D.ProjectOrientation(_pod.GetInfoOrientation()).ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "°";
@@ -963,9 +966,24 @@ namespace RAWSimO.Visualization.Rendering
             _blockStorageTag.Text = _pod.InfoTagPodStorageInfo;
             _blockReadyForRefill.Text = _pod.GetInfoReadyForRefill().ToString();
 
+            if (originalText.ToString() != _blockCapacity.Text)
+            {
+                Debug.WriteLine("test");
+            }
+
+            var compartmentCapacities = _pod.GetInfoCompartmentCapacity();
+            var compartmentCapacitiesInUse = _pod.GetInfoCompartmentsCapacityUsed();
+            for (int i = 0; i < compartmentCapacitiesInUse.Count; i++)
+            {
+                _blockCompartmentCapacity[i].Text = compartmentCapacitiesInUse[i].ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "/" +
+                    compartmentCapacities[i].ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER);
+            }
+
             // Update content info
             if (_pod.GetInfoContentChanged())
+            {
                 _contentManager.UpdateContentInfo();
+            }
         }
 
         public override void InfoPanelInit()
@@ -1018,12 +1036,14 @@ namespace RAWSimO.Visualization.Rendering
                 {
                     WrapPanel capacityCompartmentPanel = new WrapPanel { Orientation = Orientation.Horizontal };
                     capacityCompartmentPanel.Children.Add(new TextBlock { Text = $"Compartment capacity {i}: ", TextAlignment = TextAlignment.Right, MinWidth = _infoPanelLeftColumnWidth });
-                    capacityCompartmentPanel.Children.Add(new TextBlock
+                    var blockCompartmentCapacity = new TextBlock
                     {
                         Text = compartmentCapacitiesInUse[i].ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER) + "/" +
                         compartmentCapacities[i].ToString(IOConstants.EXPORT_FORMAT_SHORT, IOConstants.FORMATTER),
                         MinWidth = _infoPanelRightColumnWidth,
-                    });
+                    };
+                    capacityCompartmentPanel.Children.Add(blockCompartmentCapacity);
+                    _blockCompartmentCapacity.Add(blockCompartmentCapacity);
                     _root.Items.Add(capacityCompartmentPanel);
                 }
 
