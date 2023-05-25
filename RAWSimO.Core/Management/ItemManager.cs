@@ -700,10 +700,15 @@ namespace RAWSimO.Core.Management
         /// <param name="initialInventory">The fractional amount of desired inventory.</param>
         private void InitializePodContentsRandomly(double initialInventory)
         {
+            //var isAnyCompartmentNotFilled = Instance.Pods.SelectMany(x => x.Compartments)
+            //    .Any(c => c.CapacityInUse / c.Capacity < initialInventory);
+
             // Add stuff to pods
-            while (Instance.Pods.Sum(p => p.Compartments.Sum(c => c.CapacityInUse))
-                / Instance.Pods.Sum(p => p.Compartments.Sum(c => c.Capacity))
-                < initialInventory)
+            while (GetUsageRatio() < Instance.SettingConfig.InventoryConfiguration.DemandInventoryConfiguration.InventoryLevelBundleStopThreshold)
+            //while (Instance.Pods.SelectMany(x => x.Compartments).Any(c => c.CapacityInUse == 0))
+            //while (Instance.Pods.Sum(p => p.Compartments.Sum(c => c.CapacityInUse))
+            //    / Instance.Pods.Sum(p => p.Compartments.Sum(c => c.Capacity))
+            //    < initialInventory)
             {
                 // Create bundle
                 ItemBundle bundle = GenerateBundle();
@@ -995,7 +1000,9 @@ namespace RAWSimO.Core.Management
             if (// See whether bundle generation has to be deactivated, if it rises above a certain threshold
                 Instance.SettingConfig.InventoryConfiguration.DemandInventoryConfiguration.InventoryLevelDrivenBundleGeneration &&
                 // See whether we are above the pause threshold for bundle generation
-                Instance.StatStorageFillAndReservedAndBacklogLevel > Instance.SettingConfig.InventoryConfiguration.DemandInventoryConfiguration.InventoryLevelBundleStopThreshold)
+                GetUsageRatio() > Instance.SettingConfig.InventoryConfiguration.DemandInventoryConfiguration.InventoryLevelBundleStopThreshold
+                //Instance.StatStorageFillAndReservedAndBacklogLevel > Instance.SettingConfig.InventoryConfiguration.DemandInventoryConfiguration.InventoryLevelBundleStopThreshold
+                )
             {
                 // Entering pause?
                 if (!_bundleGenerationBlockedByInventoryLevel)
@@ -1009,6 +1016,15 @@ namespace RAWSimO.Core.Management
             }
             // If bundle generation is blocked, break
             return _bundleGenerationBlockedByInventoryLevel;
+        }
+
+        private double GetUsageRatio()
+        {
+            var allCompartments = Instance.Pods.SelectMany(x => x.Compartments);
+            var totalCount = allCompartments.Count();
+            var usedCount = allCompartments.Count(x => x.CapacityInUse > 0);
+            var usageRatio = usedCount / totalCount;
+            return usageRatio;
         }
 
         #endregion

@@ -165,7 +165,7 @@ namespace RAWSimO.Core.Elements
 
         public bool FitsForReservation(ItemBundle bundle)
         {
-            return CapacityInUse + CapacityReserved + bundle.BundleWeight <= Capacity;
+            return (CapacityInUse + CapacityReserved == 0) && (CapacityInUse + CapacityReserved + bundle.BundleWeight <= Capacity);
         }
 
         public bool Fits(ItemBundle bundle)
