@@ -9,6 +9,7 @@ using RAWSimO.Core.Randomization;
 using RAWSimO.Toolbox;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -1023,7 +1024,8 @@ namespace RAWSimO.Core.Management
             var allCompartments = Instance.Pods.SelectMany(x => x.Compartments);
             var totalCount = allCompartments.Count();
             var usedCount = allCompartments.Count(x => x.CapacityInUse > 0);
-            var usageRatio = usedCount / totalCount;
+            var usageRatio = (double)usedCount / totalCount;
+            //Debug.WriteLine($"UsageRatio = {usageRatio}, usedCount = {usedCount}");
             return usageRatio;
         }
 
