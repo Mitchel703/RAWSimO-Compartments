@@ -705,7 +705,7 @@ namespace RAWSimO.Core.Management
             //    .Any(c => c.CapacityInUse / c.Capacity < initialInventory);
 
             // Add stuff to pods
-            while (GetUsageRatio() < Instance.SettingConfig.InventoryConfiguration.DemandInventoryConfiguration.InventoryLevelBundleStopThreshold)
+            while (GetUsageRatio() < initialInventory)
             //while (Instance.Pods.SelectMany(x => x.Compartments).Any(c => c.CapacityInUse == 0))
             //while (Instance.Pods.Sum(p => p.Compartments.Sum(c => c.CapacityInUse))
             //    / Instance.Pods.Sum(p => p.Compartments.Sum(c => c.Capacity))
@@ -990,7 +990,8 @@ namespace RAWSimO.Core.Management
         {
             // See whether we have to pause bundle generation for a while
             if (// If we are below the restart threshold, ensure bundle generation activity
-                Instance.StatStorageFillAndReservedAndBacklogLevel < Instance.SettingConfig.InventoryConfiguration.DemandInventoryConfiguration.InventoryLevelBundleRestartThreshold &&
+                GetUsageRatio() < Instance.SettingConfig.InventoryConfiguration.DemandInventoryConfiguration.InventoryLevelBundleStopThreshold &&
+                //Instance.StatStorageFillAndReservedAndBacklogLevel < Instance.SettingConfig.InventoryConfiguration.DemandInventoryConfiguration.InventoryLevelBundleRestartThreshold &&
                 // Paused at all?
                 _bundleGenerationBlockedByInventoryLevel)
             {
