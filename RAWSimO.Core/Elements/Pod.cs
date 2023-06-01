@@ -105,7 +105,7 @@ namespace RAWSimO.Core.Elements
         /// <param name="extractRequest">The request for which the item shall be reserved.</param>
         internal void RegisterItem(ItemDescription item, ExtractRequest extractRequest)
         {
-            var availableCompartments = Compartments.Where(x => x.IsContained(item));
+            var availableCompartments = Compartments.Where(x => x.IsAvailable(item));
             var choosenCompartment = availableCompartments
                 .OrderBy(p => instance.Randomizer.NextDouble())
                 .First();

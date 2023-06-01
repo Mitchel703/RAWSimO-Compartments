@@ -990,7 +990,7 @@ namespace RAWSimO.Core.Management
         {
             // See whether we have to pause bundle generation for a while
             if (// If we are below the restart threshold, ensure bundle generation activity
-                GetUsageRatio() < Instance.SettingConfig.InventoryConfiguration.DemandInventoryConfiguration.InventoryLevelBundleStopThreshold &&
+                GetUsageRatio() < Instance.SettingConfig.InventoryConfiguration.DemandInventoryConfiguration.InventoryLevelBundleRestartThreshold &&
                 //Instance.StatStorageFillAndReservedAndBacklogLevel < Instance.SettingConfig.InventoryConfiguration.DemandInventoryConfiguration.InventoryLevelBundleRestartThreshold &&
                 // Paused at all?
                 _bundleGenerationBlockedByInventoryLevel)
@@ -1020,7 +1020,7 @@ namespace RAWSimO.Core.Management
             return _bundleGenerationBlockedByInventoryLevel;
         }
 
-        private double GetUsageRatio()
+        public double GetUsageRatio()
         {
             var allCompartments = Instance.Pods.SelectMany(x => x.Compartments);
             var totalCount = allCompartments.Count();

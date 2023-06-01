@@ -120,7 +120,7 @@ namespace RAWSimO.Core.Elements
                 _itemDescriptionsContained.Add(itemBundle.ItemDescription);
             // Keep track of the number of available items on this pod (for picking)
             _itemDescriptionCountAvailable[itemBundle.ItemDescription] += itemBundle.ItemCount;
-            Debug.WriteLine($"Added to {this.Name} bundle {itemBundle.ID} +{itemBundle.ItemCount} //{_itemDescriptionCountAvailable[itemBundle.ItemDescription]}");
+            //Debug.WriteLine($"Added to {this.Name} bundle {itemBundle.ID} +{itemBundle.ItemCount} //{_itemDescriptionCountAvailable[itemBundle.ItemDescription]}");
             // Keep track of the number of contained items on this pod (for picking)
             _itemDescriptionCountContained[itemBundle.ItemDescription] += itemBundle.ItemCount;
 
@@ -147,14 +147,14 @@ namespace RAWSimO.Core.Elements
             if (_itemDescriptionCountAvailable[item] <= 0)
                 throw new InvalidOperationException("Cannot reserve an item for picking, if there is none left of the kind!");
             _itemDescriptionCountAvailable[item]--;
-            Debug.WriteLine($"Registered from {this.Name} bundle {item.ID} -1 //{_itemDescriptionCountAvailable[item]}");
+            //Debug.WriteLine($"Registered from {this.Name} item {item.ID} -1 //{_itemDescriptionCountAvailable[item]}");
 
         }
 
         internal void UnregisterItem(ItemDescription item, ExtractRequest extractRequest)
         {
             _itemDescriptionCountAvailable[item]++;
-            Debug.WriteLine($"Unregistered from {this.Name} bundle {item.ID} +1 //{_itemDescriptionCountAvailable[item]}");
+            //Debug.WriteLine($"Unregistered from {this.Name} item {item.ID} +1 //{_itemDescriptionCountAvailable[item]}");
 
         }
 

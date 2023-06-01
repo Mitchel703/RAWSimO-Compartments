@@ -83,8 +83,18 @@ namespace RAWSimO.Core.Configurations
         /// </summary>
         public List<DTOPodCompartment> PodCompartments = new List<DTOPodCompartment> 
         { 
-            new DTOPodCompartment() { Capacity = 550},
-            new DTOPodCompartment() { Capacity = 650},
+            new DTOPodCompartment() { Capacity = 100},
+            new DTOPodCompartment() { Capacity = 100},
+            new DTOPodCompartment() { Capacity = 100},
+            new DTOPodCompartment() { Capacity = 100},
+            new DTOPodCompartment() { Capacity = 100},
+            new DTOPodCompartment() { Capacity = 100},
+            new DTOPodCompartment() { Capacity = 100},
+            new DTOPodCompartment() { Capacity = 100},
+            new DTOPodCompartment() { Capacity = 100},
+            new DTOPodCompartment() { Capacity = 100},
+            new DTOPodCompartment() { Capacity = 100},
+            new DTOPodCompartment() { Capacity = 100},
         };
         /// <summary>
         /// The radius of the I/O-stations in m.
