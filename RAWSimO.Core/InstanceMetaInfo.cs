@@ -253,7 +253,7 @@ namespace RAWSimO.Core
                         "#Orders".PadBoth(9) + _loggingColumnSep +
                         "#Bundles".PadBoth(10) + _loggingColumnSep +
                         "Inv.".PadBoth(6) + _loggingColumnSep +
-                        "UsageRatio.".PadBoth(12) + _loggingColumnSep +
+                        "UsageRatio".PadBoth(12) + _loggingColumnSep +
                         "Distance".PadBoth(10) + _loggingColumnSep +
                         "#Coll.".PadBoth(8);
                     switch (SettingConfig.DebugMode)
@@ -283,7 +283,7 @@ namespace RAWSimO.Core
                     StatOverallOrdersHandled.ToString().PadBoth(9) + _loggingColumnSep + // The number of handled orders so far
                     StatOverallBundlesHandled.ToString().PadBoth(10) + _loggingColumnSep + // The number of handled bundles so far
                     ((StatStorageFillLevel * 100).ToString("F0", IOConstants.FORMATTER) + "%").PadBoth(6) + _loggingColumnSep + // The current inventory level
-                    ((ItemManager.GetUsageRatio() * 100).ToString("F0", IOConstants.FORMATTER) + "%").PadBoth(6) + _loggingColumnSep + // The current inventory level
+                    ((ItemManager.GetUsageRatio() * 100).ToString("F0", IOConstants.FORMATTER) + "%").PadBoth(12) + _loggingColumnSep + // The current inventory level
                     StatOverallDistanceTraveled.ToString("F0", IOConstants.FORMATTER).PadBoth(10) + _loggingColumnSep + // The distance traveled so far
                     StatOverallCollisions.ToString().PadBoth(8); // The number of collisions that happened so far
 

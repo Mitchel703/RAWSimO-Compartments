@@ -136,7 +136,11 @@ namespace RAWSimO.Core.Elements
             if (_itemDescriptionCountContained[item] <= 0)
                 _itemDescriptionsContained.Remove(item);
             // Keep track of weight
+            //Debug.WriteLine($"Removed from {this.Name}, item {item.ID} -> CapacityInUse = {this.CapacityInUse} - item weight {item.Weight}");
             CapacityInUse -= item.Weight;
+            if (CapacityInUse < 1)
+                CapacityInUse = 0;
+            //Debug.WriteLine($"Removed from {this.Name}, item {item.ID} -> new CapacityInUse = {this.CapacityInUse}");
         }
 
         internal void RegisterItem(ItemDescription item, ExtractRequest extractRequest)
